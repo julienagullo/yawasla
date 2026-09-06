@@ -1,0 +1,25 @@
+{
+    "name": "yawasla/yawasla",
+    "description": "Yawasla is an online newsroom solution for associations.",
+    "type": "project",
+    "require": {
+        "php": "^8.0",
+        "slim/slim": "^4.15",
+        "slim/psr7": "^1.8",
+        "monolog/monolog": "^3.11",
+        "vlucas/phpdotenv": "^5.7",
+        "catfan/medoo": "^2.6"
+    },
+    "license": "Apache-2.0",
+    "autoload": {
+        "psr-4": {
+            "Yawasla\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "jagullo",
+            "email": "contact@yawasla.org"
+        }
+    ]
+}

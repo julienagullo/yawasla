@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+
+# IDE
+.idea/
+
+# PHP / Composer
+vendor/
+
+# Front / Node
+node_modules/
+dist/
+build/
+
+# Environnement (secrets, identifiants BDD, cles API)
+.env
+.env.local
+*.env
+
+# Logs
+*.log
