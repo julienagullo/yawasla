@@ -16,7 +16,7 @@ Le périmètre fonctionnel décrit ci-dessous est volontairement restreint à ce
 
 - **Backend** : PHP 8.0+, gestion des dépendances via Composer
 - **Frontend** : React (compilé via npm)
-- **Base de données** : MySQL 8.0+ ou MariaDB 10.11+
+- **Base de données** : MySQL 8.0+ ou MariaDB 10.11+ (SQLite disponible en option, non recommandé en production)
 - **Serveur web** : Apache ou Nginx avec réécriture d'URL
 - **SSL** : obligatoire (requis pour les notifications push)
 - **Notifications** : API Brevo (mail), Service Workers (push) — l'intégration doit rester interchangeable, éviter le couplage fort à Brevo
@@ -42,7 +42,7 @@ Ne pas développer sans demande explicite : tout ce qui n'est pas listé ci-dess
 
 ## TODO
 
-### T4 2026
+### T1 2027
 
 - [ ] Mise en place du socle technique (installation PHP/Composer, structure projet, connexion base de données)
 - [ ] Système d'authentification (formulaire de connexion, mot de passe oublié, mail d'alerte)
@@ -55,24 +55,24 @@ Ne pas développer sans demande explicite : tout ce qui n'est pas listé ci-dess
 - [ ] Tests d'installation (vérifier la facilité de mise en place pour un développeur débutant)
 - [ ] Page statique de présentation sur le domaine yawasla.org (préparer le référencement)
 
-### T1 2027
+### T2 2027
 
 - [ ] Intégration Brevo pour l'envoi de mail (pensé interchangeable)
 - [ ] Mise en place des notifications push (Service Worker, SSL, gestion des permissions navigateur)
 - [ ] Front-office : formulaire d'inscription aux annonces par mail
 
-### T2 2027
+### T3 2027
 
 - [ ] Intégration du module de création/gestion des utilisateurs (multi-user complet)
 - [ ] Intégration de la gestion du compte et des paramètres d'affichage
 
-### T3 2027
+### T4 2027
 
 - [ ] Ajout du tableau de bord et des graphiques
 - [ ] Site vitrine de présentation sur le domaine yawasla.org
 - [ ] Documentation technique pour l'installation et la mise en place
 
-### T4 2027
+### T1 2028
 
 - [ ] Gestion des modules
 - [ ] Gestion des prières
