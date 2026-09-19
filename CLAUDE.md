@@ -21,6 +21,46 @@ Le périmètre fonctionnel décrit ci-dessous est volontairement restreint à ce
 - **SSL** : obligatoire (requis pour les notifications push)
 - **Notifications** : API Brevo (mail), Service Workers (push) — l'intégration doit rester interchangeable, éviter le couplage fort à Brevo
 - **Hébergement cible** : VPS OVH sous Debian
+- **Templates mail** : pas de moteur de template PHP côté projet — on utilise les templates gérés dans Brevo, ou un mail standard (texte simple) en fallback si aucun template Brevo n'est défini
+
+## Couche d'accès aux données (ORM maison)
+
+Medoo est utilisé comme query builder de base, mais il retourne des tableaux bruts. Pour rester aligné avec l'esprit « noyau minimal et léger » du projet (pas de dépendance à un ORM tiers lourd type Doctrine/Eloquent), on construit un ORM maison très simple par-dessus Medoo : une classe abstraite `Model` (pattern Active Record simplifié) dont héritent les entités (`Organisme`, `Annonce`, plus tard `User`/`Role`).
+
+Portée volontairement réduite : pas de relations complexes, pas de lazy loading, pas de unit-of-work. Uniquement l'hydratation objet et le CRUD de base.
+
+### Fonctions nécessaires (classe abstraite `Model`)
+
+- `find(int|string $id): ?static` — récupérer une entité par clé primaire
+- `all(array $where = []): static[]` — récupérer une liste, avec filtres optionnels
+- `first(array $where): ?static` — récupérer un seul enregistrement selon des critères
+- `count(array $where = []): int` — compter les enregistrements
+- `exists(): bool` — vérifier si l'entité existe déjà en base
+- `save(): bool` — insert ou update selon que l'entité est nouvelle ou existante
+- `delete(): bool` — suppression de l'entité
+- `fill(array $data): static` — hydratation de l'objet depuis un tableau (ex. résultat Medoo, données de formulaire)
+- `toArray(): array` — sérialisation de l'objet vers un tableau
+- `paginate(int $page, int $perPage, array $where = []): array` — récupération paginée, utile aussi bien pour la liste d'annonces en back-office que pour la page newsroom publique
+
+### Configuration par entité (à définir dans chaque classe fille)
+
+- `table(): string` — nom de la table associée
+- `primaryKey(): string` — nom de la clé primaire (défaut `id`)
+- `fillable(): array` — liste des champs autorisés à l'hydratation de masse
+
+### Cache objet
+
+Objectif : amortir la charge quand plusieurs utilisateurs demandent la même donnée en même temps (ex. `Organisme`, une annonce populaire) — pas une optimisation de latence individuelle, mais un enjeu de charge concurrente (ex. pic de visiteurs sur la page newsroom publique).
+
+- **Backend** : APCu (mémoire partagée entre tous les process PHP du serveur, contrairement à la session qui est propre à chaque visiteur et donc inutile pour ce besoin)
+- **Portée** : uniquement les lookups par clé primaire (`find($id)`) — pas de cache sur les listes/requêtes filtrées (`all()`, `paginate()`), l'invalidation y serait trop complexe (il faudrait invalider sur tout insert/update de la table)
+- **Invalidation** : suppression de la clé de cache correspondante à chaque `save()`/`delete()` de l'entité concernée
+- **Fallback** : si l'extension APCu n'est pas disponible (fréquent sur hébergement mutualisé bas de gamme, contrairement au VPS ciblé où elle s'installe en une commande), le cache est simplement désactivé silencieusement — aucune erreur, le site reste fonctionnel sans le gain de perf
+
+### À prévoir (hors socle initial, à activer si besoin)
+
+- Timestamps automatiques (`created_at` / `updated_at`) si activés sur l'entité
+- Exceptions dédiées (ex. `ModelNotFoundException`) plutôt que des retours `null` silencieux dans les cas critiques
 
 ## Périmètre fonctionnel de la bêta
 
