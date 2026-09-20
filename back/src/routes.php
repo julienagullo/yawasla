@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\App;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 
-return static function (App $app): void {
+return static function (RouteCollectorProxyInterface $app): void {
     $app->get('/', function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
         $response->getBody()->write((string) json_encode(['status' => 'ok']));
 

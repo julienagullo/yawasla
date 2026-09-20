@@ -19,6 +19,6 @@ final class User extends Model
 
     public static function fillable(): array
     {
-        return ['organization_id', 'email', 'password', 'role'];
+        return ['organization_id', 'first_name', 'last_name', 'display_name', 'email', 'password', 'role'];
     }
 }

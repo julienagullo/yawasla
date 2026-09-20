@@ -1,0 +1,67 @@
+/* Palette reprise de la page vitrine (Project/build/style.css) : mêmes noms de variables,
+   pour rester alignés entre le site vitrine et l'application. */
+:root {
+  --bg: #faf8f3;
+  --bg-soft: #f1ecdf;
+  --ink: #1f2a24;
+  --ink-soft: #4d5a52;
+  --green: #14b476;
+  --green-deep: #2e6249;
+  --gold: #e46d0a;
+  --gold-soft: #f2b934;
+  --card: #ffffff;
+  --border: #e4ddc9;
+  --line: #dedede;
+  --text: #1a1f17;
+  --on-green: #fbf9f2;
+  --danger: #b3261e;
+
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --radius: 0.6rem;
+  --shadow: 0 6px 18px rgba(31, 42, 36, 0.08);
+
+  color-scheme: light;
+}
+
+/* Thème sombre : suit le système, sauf choix explicite (data-theme) de l'utilisateur */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #12160f;
+    --bg-soft: #1a1f17;
+    --ink: #ecebe4;
+    --ink-soft: #b9c0b6;
+    --green: #17d68c;
+    --green-deep: #20975e;
+    --gold: #e4c98a;
+    --gold-soft: #e46d0a;
+    --card: #191f18;
+    --border: #2a3226;
+    --line: #333a30;
+    --text: #f1ecdf;
+    --danger: #e4554f;
+    --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #12160f;
+  --bg-soft: #1a1f17;
+  --ink: #ecebe4;
+  --ink-soft: #b9c0b6;
+  --green: #17d68c;
+  --green-deep: #20975e;
+  --gold: #e4c98a;
+  --gold-soft: #e46d0a;
+  --card: #191f18;
+  --border: #2a3226;
+  --line: #333a30;
+  --text: #f1ecdf;
+  --danger: #e4554f;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+
+  color-scheme: dark;
+}

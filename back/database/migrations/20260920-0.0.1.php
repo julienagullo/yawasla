@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use Medoo\Medoo;
+use Yawasla\Core\Schema;
 
 return function (Medoo $db): void {
+    $options = Schema::tableOptions($db);
+
     $db->create('organizations', [
         '@id',
         'nom' => ['VARCHAR(255)', 'NOT NULL'],
@@ -15,17 +18,20 @@ return function (Medoo $db): void {
         'email' => ['VARCHAR(255)', 'NULL'],
         'domain' => ['VARCHAR(255)', 'NULL'],
         'UNIQUE (domain)',
-    ]);
+    ], $options);
 
     $db->create('users', [
         '@id',
         'organization_id' => ['BIGINT', 'NOT NULL'],
+        'first_name' => ['VARCHAR(100)', 'NOT NULL'],
+        'last_name' => ['VARCHAR(100)', 'NOT NULL'],
+        'display_name' => ['VARCHAR(100)', 'NOT NULL'],
         'email' => ['VARCHAR(255)', 'NOT NULL'],
         'password' => ['VARCHAR(255)', 'NOT NULL'],
         'role' => ['VARCHAR(20)', 'NOT NULL'],
         'UNIQUE (email)',
         'FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE CASCADE',
-    ]);
+    ], $options);
 
     $db->create('announcements', [
         '@id',
@@ -38,7 +44,7 @@ return function (Medoo $db): void {
         'published_at' => ['DATETIME', 'NULL'],
         'FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE CASCADE',
         'FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE',
-    ]);
+    ], $options);
 
     $db->create('media', [
         '@id',
@@ -49,5 +55,5 @@ return function (Medoo $db): void {
         'status' => ['VARCHAR(20)', 'NOT NULL'],
         'published_at' => ['DATETIME', 'NULL'],
         'FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE CASCADE',
-    ]);
+    ], $options);
 };

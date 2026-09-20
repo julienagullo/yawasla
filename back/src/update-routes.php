@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\App;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 use Yawasla\Core\Migrator;
 
-return static function (App $app, Migrator $migrator): void {
+return static function (RouteCollectorProxyInterface $app, Migrator $migrator): void {
     $app->get('/', function (ServerRequestInterface $request, ResponseInterface $response) use ($migrator): ResponseInterface {
         $response->getBody()->write((string) json_encode([
             'status' => 'update_required',

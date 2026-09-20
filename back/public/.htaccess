@@ -1,0 +1,10 @@
+# Toute requête qui ne correspond pas à un fichier existant est envoyée à index.php.
+# BASE = chemin de base de l'app (vide à la racine, "/yawasla" derrière un alias ou un
+# sous-dossier), déduit de l'URL pour ne pas dépendre de RewriteBase.
+RewriteEngine On
+
+RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
+RewriteRule .* - [E=BASE:%1]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ %{ENV:BASE}/index.php [L]
