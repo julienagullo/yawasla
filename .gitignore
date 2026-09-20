@@ -19,3 +19,7 @@ build/
 
 # Logs
 *.log
+
+# Fichiers générés par environnement (logs, cache de routes Slim, etc.)
+back/var/*
+!back/var/.gitkeep

@@ -8,7 +8,9 @@
         "slim/psr7": "^1.8",
         "monolog/monolog": "^3.11",
         "vlucas/phpdotenv": "^5.7",
-        "catfan/medoo": "^2.6"
+        "catfan/medoo": "^2.6",
+        "psr/container": "^2.0",
+        "psr/log": "^3.0"
     },
     "license": "Apache-2.0",
     "autoload": {
