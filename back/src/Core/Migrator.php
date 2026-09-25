@@ -22,8 +22,8 @@ final class Migrator
     private const DATA_TABLES = ['organizations', 'users'];
 
     public function __construct(
-        private readonly Medoo $connection,
-        private readonly string $migrationsPath,
+        private Medoo $connection,
+        private string $migrationsPath,
     ) {
     }
 

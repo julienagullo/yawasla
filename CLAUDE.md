@@ -15,6 +15,8 @@ Le périmètre fonctionnel décrit ci-dessous est volontairement restreint à ce
 ## Stack technique
 
 - **Backend** : PHP 8.0+, gestion des dépendances via Composer
+  - La compatibilité PHP 8.0 prime : aucune syntaxe 8.1+ (`readonly`, `enum`, `never`, `new` dans les initialiseurs, callables `f(...)`, `array_is_list`…)
+  - `config.platform.php` est fixé à `8.0.30` dans `composer.json` : Composer ne résout que des dépendances compatibles 8.0 (d'où `monolog/monolog ^2`, la v3 exige 8.1)
 - **Frontend** : React (compilé via npm)
 - **Base de données** : MySQL 8.0+ ou MariaDB 10.11+ (SQLite disponible en option, non recommandé en production)
 - **Serveur web** : Apache ou Nginx avec réécriture d'URL
@@ -30,6 +32,12 @@ Medoo est utilisé comme query builder de base ; il retourne des tableaux bruts.
 Portée volontairement réduite : pas de relations complexes, pas de lazy loading, pas de unit-of-work. Uniquement l'hydratation objet et le CRUD de base.
 
 Interface complète (`find`, `all`, `first`, `count`, `exists`, `save`, `delete`, `fill`, `toArray`, `paginate`, config par entité via `table()`/`primaryKey()`/`fillable()`) : voir `src/Core/Model.php`, implémenté.
+
+Colonnes = propriétés publiques typées de l'entité (snake_case, même nom que la colonne), pas de tableau `$attributes` magique :
+- Le type déclaré sert de cast : `hydrate()`/`fill()` convertissent les valeurs brutes (`"42"` → `int`, `DATETIME` → `DateTimeImmutable`), `save()` fait l'inverse
+- Valeurs par défaut calquées sur la migration : colonne `NULL` → `= null`, colonne `NOT NULL` sans `DEFAULT` → pas de défaut PHP (propriété non initialisée = champ obligatoire, `save()` lève une `LogicException`), colonne avec `DEFAULT` → même défaut en PHP. Toute modification de schéma doit être répercutée sur l'entité
+- `fillable()` ne liste plus les colonnes : c'est uniquement la protection contre le mass-assignment
+- `__get`/`__set` lèvent une `LogicException` sur une propriété inconnue (sinon PHP < 8.2 crée une propriété dynamique en silence)
 
 ### Entités (`src/Entity/`)
 

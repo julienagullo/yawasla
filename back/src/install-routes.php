@@ -101,11 +101,11 @@ return static function (
             }
 
             $organization = (new Organization())->fill([
-                'nom' => $text($request, $data, 'name', 'Nom de l\'organisme', 255, true),
-                'adresse' => $text($request, $data, 'address', 'Adresse', 255, false),
-                'ville' => $text($request, $data, 'city', 'Ville', 255, false),
-                'code_postal' => $text($request, $data, 'postal_code', 'Code postal', 20, false),
-                'telephone' => $text($request, $data, 'phone', 'Téléphone', 20, false),
+                'name' => $text($request, $data, 'name', 'Nom de l\'organisme', 255, true),
+                'address' => $text($request, $data, 'address', 'Adresse', 255, false),
+                'city' => $text($request, $data, 'city', 'Ville', 255, false),
+                'postal_code' => $text($request, $data, 'postal_code', 'Code postal', 20, false),
+                'phone' => $text($request, $data, 'phone', 'Téléphone', 20, false),
                 'email' => $email,
                 'domain' => $domain,
             ]);

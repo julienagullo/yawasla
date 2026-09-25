@@ -14,8 +14,8 @@ use Throwable;
 final class JsonErrorHandler
 {
     public function __construct(
-        private readonly ResponseFactoryInterface $responseFactory,
-        private readonly LoggerInterface $logger,
+        private ResponseFactoryInterface $responseFactory,
+        private LoggerInterface $logger,
     ) {
     }
 

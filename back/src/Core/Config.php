@@ -6,14 +6,14 @@ namespace Yawasla\Core;
 
 final class Config
 {
-    public readonly string $appEnv;
-    public readonly string $dbConnection;
-    public readonly string $dbHost;
-    public readonly int $dbPort;
-    public readonly string $dbDatabase;
-    public readonly string $dbUsername;
-    public readonly string $dbPassword;
-    public readonly string $dbCharset;
+    public string $appEnv;
+    public string $dbConnection;
+    public string $dbHost;
+    public int $dbPort;
+    public string $dbDatabase;
+    public string $dbUsername;
+    public string $dbPassword;
+    public string $dbCharset;
 
     public function __construct(array $env)
     {

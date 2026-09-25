@@ -4,14 +4,25 @@ declare(strict_types=1);
 
 namespace Yawasla\Core;
 
+use DateTimeImmutable;
+use DateTimeInterface;
+use LogicException;
 use Medoo\Medoo;
+use ReflectionClass;
+use ReflectionNamedType;
+use ReflectionProperty;
 use RuntimeException;
 
 abstract class Model
 {
     private static ?Medoo $connection = null;
 
-    protected array $attributes = [];
+    /**
+     * Colonnes de chaque entité : ses propriétés publiques non statiques, indexées par nom.
+     *
+     * @var array<class-string, array<string, ReflectionProperty>>
+     */
+    private static array $columns = [];
 
     protected bool $exists = false;
 
@@ -40,26 +51,24 @@ abstract class Model
         return self::$connection;
     }
 
+    // Sans ces garde-fous, PHP < 8.2 crée silencieusement une propriété dynamique sur une faute de frappe
     public function __get(string $name): mixed
     {
-        return $this->attributes[$name] ?? null;
+        throw new LogicException(sprintf('Propriété inconnue : %s::$%s.', static::class, $name));
     }
 
     public function __set(string $name, mixed $value): void
     {
-        $this->attributes[$name] = $value;
-    }
-
-    public function __isset(string $name): bool
-    {
-        return isset($this->attributes[$name]);
+        throw new LogicException(sprintf('Propriété inconnue : %s::$%s.', static::class, $name));
     }
 
     public function fill(array $data): static
     {
+        $columns = static::columns();
+
         foreach (static::fillable() as $field) {
             if (array_key_exists($field, $data)) {
-                $this->attributes[$field] = $data[$field];
+                $this->{$field} = static::cast($columns[$field], $data[$field]);
             }
         }
 
@@ -68,7 +77,16 @@ abstract class Model
 
     public function toArray(): array
     {
-        return $this->attributes;
+        $data = [];
+
+        foreach (static::columns() as $name => $property) {
+            if ($property->isInitialized($this)) {
+                $value = $this->{$name};
+                $data[$name] = $value instanceof DateTimeInterface ? $value->format(DateTimeInterface::ATOM) : $value;
+            }
+        }
+
+        return $data;
     }
 
     public function exists(): bool
@@ -130,24 +148,23 @@ abstract class Model
     {
         $primaryKey = static::primaryKey();
 
-        if ($this->exists) {
-            $id = $this->attributes[$primaryKey];
-            $data = $this->attributes;
-            unset($data[$primaryKey]);
+        $data = $this->toDatabase();
+        unset($data[$primaryKey]);
 
-            $statement = static::connection()->update(static::table(), $data, [$primaryKey => $id]);
+        if ($this->exists) {
+            $statement = static::connection()->update(static::table(), $data, [$primaryKey => $this->{$primaryKey}]);
         } else {
-            $statement = static::connection()->insert(static::table(), $this->attributes);
+            $statement = static::connection()->insert(static::table(), $data);
 
             if ($statement === null) {
                 return false;
             }
 
-            $this->attributes[$primaryKey] = (int) static::connection()->id();
+            $this->{$primaryKey} = static::cast(static::columns()[$primaryKey], static::connection()->id());
             $this->exists = true;
         }
 
-        static::forgetCache($this->attributes[$primaryKey]);
+        static::forgetCache($this->{$primaryKey});
 
         return $statement !== null;
     }
@@ -159,7 +176,7 @@ abstract class Model
         }
 
         $primaryKey = static::primaryKey();
-        $id = $this->attributes[$primaryKey];
+        $id = $this->{$primaryKey};
 
         $statement = static::connection()->delete(static::table(), [$primaryKey => $id]);
 
@@ -192,10 +209,81 @@ abstract class Model
     protected static function hydrate(array $row): static
     {
         $instance = new static();
-        $instance->attributes = $row;
+
+        foreach (static::columns() as $name => $property) {
+            if (array_key_exists($name, $row)) {
+                $instance->{$name} = static::cast($property, $row[$name]);
+            }
+        }
+
         $instance->exists = true;
 
         return $instance;
+    }
+
+    /**
+     * @return array<string, ReflectionProperty>
+     */
+    protected static function columns(): array
+    {
+        if (!isset(self::$columns[static::class])) {
+            self::$columns[static::class] = [];
+
+            foreach ((new ReflectionClass(static::class))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+                if (!$property->isStatic()) {
+                    self::$columns[static::class][$property->getName()] = $property;
+                }
+            }
+        }
+
+        return self::$columns[static::class];
+    }
+
+    /**
+     * Convertit une valeur brute (ligne Medoo, données de formulaire) vers le type déclaré de la propriété.
+     */
+    private static function cast(ReflectionProperty $property, mixed $value): mixed
+    {
+        $type = $property->getType();
+
+        if ($value === null || !$type instanceof ReflectionNamedType) {
+            return $value;
+        }
+
+        return match ($type->getName()) {
+            'int' => (int) $value,
+            'float' => (float) $value,
+            'bool' => (bool) $value,
+            'string' => (string) $value,
+            DateTimeImmutable::class => $value instanceof DateTimeInterface
+                ? DateTimeImmutable::createFromInterface($value)
+                : new DateTimeImmutable((string) $value),
+            default => $value,
+        };
+    }
+
+    /**
+     * Valeurs à écrire en base. Une propriété non initialisée correspond à une colonne NOT NULL sans défaut.
+     */
+    private function toDatabase(): array
+    {
+        $data = [];
+
+        foreach (static::columns() as $name => $property) {
+            if (!$property->isInitialized($this)) {
+                throw new LogicException(sprintf('%s::$%s n\'est pas renseigné.', static::class, $name));
+            }
+
+            $value = $this->{$name};
+
+            $data[$name] = match (true) {
+                $value instanceof DateTimeInterface => $value->format('Y-m-d H:i:s'),
+                is_bool($value) => (int) $value,
+                default => $value,
+            };
+        }
+
+        return $data;
     }
 
     private static function cacheKey(int|string $id): string

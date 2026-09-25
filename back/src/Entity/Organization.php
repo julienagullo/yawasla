@@ -8,6 +8,15 @@ use Yawasla\Core\Model;
 
 final class Organization extends Model
 {
+    public ?int $id = null;
+    public string $name;
+    public ?string $address = null;
+    public ?string $city = null;
+    public ?string $postal_code = null;
+    public ?string $phone = null;
+    public ?string $email = null;
+    public ?string $domain = null;
+
     public static function table(): string
     {
         return 'organizations';
@@ -15,7 +24,7 @@ final class Organization extends Model
 
     public static function fillable(): array
     {
-        return ['nom', 'adresse', 'ville', 'code_postal', 'telephone', 'email', 'domain'];
+        return ['name', 'address', 'city', 'postal_code', 'phone', 'email', 'domain'];
     }
 
     public static function forDomain(string $domain): ?static

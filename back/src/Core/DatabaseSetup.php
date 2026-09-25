@@ -16,7 +16,7 @@ use Throwable;
  */
 final class DatabaseSetup
 {
-    public function __construct(private readonly string $envPath)
+    public function __construct(private string $envPath)
     {
     }
 

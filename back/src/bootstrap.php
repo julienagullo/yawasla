@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Dotenv\Dotenv;
 use Medoo\Medoo;
 use Monolog\Handler\StreamHandler;
-use Monolog\Level;
 use Monolog\Logger;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Log\LoggerInterface;
@@ -46,7 +45,7 @@ if (!is_dir($logsDir) && !mkdir($logsDir, 0775, true) && !is_dir($logsDir)) {
 }
 
 $logger = new Logger('yawasla');
-$logger->pushHandler(new StreamHandler($logsDir . '/app.log', Level::Debug));
+$logger->pushHandler(new StreamHandler($logsDir . '/app.log', Logger::DEBUG));
 
 $setup = new DatabaseSetup(__DIR__ . '/../.env');
 
