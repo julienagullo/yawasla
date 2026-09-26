@@ -163,8 +163,6 @@ function assemble() {
   for (const item of ['public', 'src', 'database', 'composer.json', 'composer.lock', '.env.example', '.htaccess']) {
     copy(join(BACK, item), join(STAGING, item))
   }
-  mkdirSync(join(STAGING, 'var'))
-  copyFileSync(join(BACK, 'var', '.gitkeep'), join(STAGING, 'var', '.gitkeep'))
 
   // Front : index.html devient le gabarit servi par AppShell, le reste va dans public/
   const frontDist = join(FRONT_BUILD, 'dist')
@@ -187,6 +185,16 @@ function assemble() {
 
 function installBackDependencies() {
   run(`${COMPOSER} install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress`, STAGING)
+}
+
+// Fichiers utiles au build ou à git mais pas à l'exécution (vendor/ n'est pas touché : ce n'est pas notre code).
+// var/ n'est pas livré : ses dossiers sont créés au démarrage.
+function removeBuildFiles() {
+  const files = ['composer.json', 'composer.lock', join('database', 'migrations', '.gitkeep')]
+
+  for (const file of files) {
+    rmSync(join(STAGING, file), { force: true })
+  }
 }
 
 // php -l sur le code du projet (vendor/ exclu : déjà validé par ses auteurs)
@@ -306,6 +314,8 @@ assemble()
 
 step('Back : dépendances de production')
 installBackDependencies()
+
+removeBuildFiles()
 
 step('Vérification PHP')
 lintPhp()
