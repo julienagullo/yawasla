@@ -27,6 +27,14 @@ final class JsonErrorHandler
         bool $logErrorDetails,
     ): ResponseInterface {
         if ($exception instanceof ApiException) {
+            // Erreur d'origine (ex. PDOException) : absente de la réponse, mais indispensable au diagnostic
+            if ($exception->getPrevious() !== null) {
+                $this->logger->warning($exception->getMessage(), [
+                    'code' => $exception->getErrorCode(),
+                    'exception' => $exception->getPrevious(),
+                ]);
+            }
+
             $status = $exception->getStatus();
             $payload = ['error' => ['code' => $exception->getErrorCode(), 'message' => $exception->getMessage()]];
 

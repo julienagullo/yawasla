@@ -69,6 +69,8 @@ For a test build including uncommitted changes, add `--allow-dirty`.
 
 Unzip the archive on the server and point the site's document root to the `public/` folder, then open the site: the installation wizard takes over. SSL is required.
 
+On shared hosting, rename `public/` to your host's web folder (OVH: `www/`, cPanel: `public_html/`) and upload the archive content to its parent folder.
+
 ## Tech stack
 
 - **Backend**: PHP 8.0+ with [Slim](https://www.slimframework.com/), a custom lightweight ORM (Active Record over [Medoo](https://medoo.in/)) with an APCu object cache

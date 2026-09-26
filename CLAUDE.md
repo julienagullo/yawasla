@@ -132,7 +132,7 @@ Ne pas développer sans demande explicite : tout ce qui n'est pas listé ci-dess
 
 - [x] Mise en place du socle technique (installation PHP/Composer, structure projet, connexion base de données)
 - [x] Système d'installation de la base de données + création organisme et utilisateur principal
-- [ ] Tests d'installation (vérifier la facilité de mise en place pour un développeur débutant)
+- [x] Tests d’installation (vérifier la facilité de mise en place pour un développeur débutant)
 - [ ] Système d'authentification (formulaire de connexion, mot de passe oublié, mail d'alerte)
 - [ ] Architecture des rôles/permissions (base technique pour le multi-utilisateur)
 - [ ] Module gestion de l'organisme (back-office)
