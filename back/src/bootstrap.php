@@ -7,11 +7,16 @@ use Medoo\Medoo;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpNotFoundException;
 use Slim\Factory\AppFactory;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\ServerRequestFactory;
 use Throwable;
+use Yawasla\Core\AppShell;
 use Yawasla\Core\Config;
 use Yawasla\Core\Container;
 use Yawasla\Core\DatabaseSetup;
@@ -48,6 +53,17 @@ $logger = new Logger('yawasla');
 $logger->pushHandler(new StreamHandler($logsDir . '/app.log', Logger::DEBUG));
 
 $setup = new DatabaseSetup(__DIR__ . '/../.env');
+
+// Chemin de base déduit de l'emplacement de index.php : vide à la racine d'un domaine,
+// "/yawasla" si l'app est servie depuis un sous-dossier ou un alias Apache.
+$basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+$apiBase = $basePath . APP_API_PREFIX;
+
+// index.php est l'unique point d'entrée : /api/* pour l'API, tout le reste sert le front (AppShell)
+$requestPath = (string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+$isApiRequest = $requestPath === $apiBase || str_starts_with($requestPath, $apiBase . '/');
+
+$shell = new AppShell(__DIR__ . '/../resources/app.html');
 
 // Si la base n'est pas utilisable, l'assistant d'installation prend la main (état "config_required") :
 //  - "no_env" : pas de fichier .env, il faut d'abord renseigner la connexion à la base ;
@@ -103,6 +119,14 @@ if (!$setup->hasEnvFile()) {
                 $logger->error('Connexion à la base de données impossible.', ['exception' => $exception]);
 
                 http_response_code(503);
+
+                // Page du front sans état injecté : il interroge l'API, reçoit ce 503 et affiche l'erreur
+                if (!$isApiRequest && $shell->exists()) {
+                    header('Content-Type: text/html; charset=utf-8');
+                    echo $shell->render($basePath, ['basePath' => $basePath, 'apiBase' => $apiBase]);
+                    exit;
+                }
+
                 header('Content-Type: application/json');
                 echo json_encode(['error' => ['message' => 'Service temporairement indisponible.']]);
                 exit;
@@ -153,9 +177,7 @@ if ($database !== null) {
 
 $app = AppFactory::createFromContainer($container);
 
-// Chemin de base déduit de l'emplacement de index.php : vide à la racine d'un domaine,
-// "/yawasla" si l'app est servie depuis un sous-dossier ou un alias Apache.
-$app->setBasePath(rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/'));
+$app->setBasePath($basePath);
 
 // Le cache de routes n'est activé que pour l'état "normal" (dbVersion === APP_VERSION) :
 // tant que install/update sont possibles, l'ensemble de routes chargé change selon l'état
@@ -184,6 +206,43 @@ $app->group(APP_API_PREFIX, function (RouteCollectorProxyInterface $group) use (
     } else {
         (require __DIR__ . '/routes.php')($group);
     }
+});
+
+// Toute autre URL (GET) : page du front, avec l'état de l'app (GET /api/) déjà injecté,
+// ce qui évite au front un aller-retour au démarrage
+$app->get('/{path:.*}', function (ServerRequestInterface $request, ResponseInterface $response) use ($app, $shell, $basePath, $apiBase, $isApiRequest): ResponseInterface {
+    // Route d'API inconnue : 404 JSON, jamais la page HTML
+    if ($isApiRequest) {
+        throw new HttpNotFoundException($request);
+    }
+
+    if (!$shell->exists()) {
+        $response->getBody()->write('Front non compilé : en dev, utilisez le serveur Vite (npm run dev dans front/).');
+
+        return $response->withStatus(404)->withHeader('Content-Type', 'text/plain; charset=utf-8');
+    }
+
+    $boot = ['basePath' => $basePath, 'apiBase' => $apiBase];
+
+    // Sous-requête interne : même logique et même réponse que si le front appelait GET /api/.
+    // Requête neuve : la requête courante porte déjà son résultat de routage (cette route), que Slim
+    // réutiliserait → boucle infinie
+    $statusRequest = (new ServerRequestFactory())->createServerRequest(
+        'GET',
+        $request->getUri()->withPath($apiBase . '/')->withQuery(''),
+        $request->getServerParams(),
+    );
+    $statusResponse = $app->handle($statusRequest);
+    if ($statusResponse->getStatusCode() === 200) {
+        $boot['status'] = json_decode((string) $statusResponse->getBody(), true);
+    }
+
+    $response->getBody()->write($shell->render($basePath, $boot));
+
+    return $response
+        ->withHeader('Content-Type', 'text/html; charset=utf-8')
+        // L'état injecté change avec la base : la page ne doit pas être mise en cache
+        ->withHeader('Cache-Control', 'no-store');
 });
 
 return $app;

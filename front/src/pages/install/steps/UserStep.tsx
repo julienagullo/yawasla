@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { createUser } from '../../../api/install'
 import { useAsyncAction } from '../../../hooks/useAsyncAction'
+import { t } from '../../../i18n/i18n'
 
 const MIN_PASSWORD_LENGTH = 8
 
@@ -27,11 +28,11 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
     event.preventDefault()
 
     if (password.length < MIN_PASSWORD_LENGTH) {
-      setError(`Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`)
+      setError(() => t('install.user.passwordTooShort', { min: MIN_PASSWORD_LENGTH }))
       return
     }
     if (password !== confirmation) {
-      setError('Les mots de passe ne correspondent pas.')
+      setError(() => t('install.user.passwordMismatch'))
       return
     }
 
@@ -48,14 +49,14 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
 
   return (
     <>
-      <h1>Compte principal</h1>
-      <p>Ce compte sera le propriétaire de l’organisme et donnera accès au back-office et à tous les modules.</p>
+      <h1>{t('install.user.title')}</h1>
+      <p>{t('install.user.intro')}</p>
 
       <form onSubmit={handleSubmit}>
         <fieldset disabled={pending}>
           <div className="field-row">
             <label>
-              Prénom *
+              {t('install.user.firstName')}
               <input
                 required
                 autoComplete="given-name"
@@ -64,7 +65,7 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
               />
             </label>
             <label>
-              Nom *
+              {t('install.user.lastName')}
               <input
                 required
                 autoComplete="family-name"
@@ -74,7 +75,7 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
             </label>
           </div>
           <label>
-            Nom d’affichage
+            {t('install.user.displayName')}
             <input
               required
               value={displayName}
@@ -85,7 +86,7 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
             />
           </label>
           <label>
-            Adresse e-mail *
+            {t('install.user.email')}
             <input
               type="email"
               required
@@ -96,7 +97,7 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
           </label>
           <div className="field-row">
             <label>
-              Mot de passe
+              {t('install.user.password')}
               <input
                 type="password"
                 required
@@ -106,7 +107,7 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
               />
             </label>
             <label>
-              Confirmation
+              {t('install.user.confirmation')}
               <input
                 type="password"
                 required
@@ -121,7 +122,7 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
         {error && <p role="alert">{error}</p>}
 
         <button type="submit" disabled={pending}>
-          {pending ? 'Création…' : 'Terminer l’installation'}
+          {pending ? t('install.user.submitting') : t('install.user.submit')}
         </button>
       </form>
     </>

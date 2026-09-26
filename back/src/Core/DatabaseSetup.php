@@ -7,7 +7,6 @@ namespace Yawasla\Core;
 use Medoo\Medoo;
 use PDO;
 use PDOException;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -54,15 +53,16 @@ final class DatabaseSetup
      *
      * @param array{host: string, port: int, database: string, username: string, password: string} $credentials
      * @return bool true si la base a été créée
-     * @throws RuntimeException avec un message affichable à l'utilisateur
+     * @throws ApiException
      */
     public function prepareDatabase(array $credentials): bool
     {
         $database = $credentials['database'];
 
         if (preg_match('/^[A-Za-z0-9_$-]{1,64}$/', $database) !== 1) {
-            throw new RuntimeException(
-                'Le nom de la base ne peut contenir que des lettres, chiffres, "_", "-" et "$" (64 caractères maximum).'
+            throw new ApiException(
+                'database.invalid_name',
+                'Le nom de la base ne peut contenir que des lettres, chiffres, "_", "-" et "$" (64 caractères maximum).',
             );
         }
 
@@ -80,14 +80,14 @@ final class DatabaseSetup
                 break;
             } catch (PDOException $exception) {
                 if (!self::isUnreachable($exception)) {
-                    throw new RuntimeException($this->connectionMessage($exception), 0, $exception);
+                    throw $this->connectionError($exception);
                 }
                 $lastException = $exception;
             }
         }
 
         if ($pdo === null) {
-            throw new RuntimeException($this->connectionMessage($lastException), 0, $lastException);
+            throw $this->connectionError($lastException);
         }
 
         $statement = $pdo->prepare('SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = ?');
@@ -105,10 +105,11 @@ final class DatabaseSetup
                 Schema::COLLATION,
             ));
         } catch (PDOException $exception) {
-            throw new RuntimeException(
-                "La base \"{$database}\" n'existe pas et n'a pas pu être créée (droits insuffisants ?). "
-                . 'Créez-la depuis votre hébergeur, puis réessayez.',
-                0,
+            throw new ApiException(
+                'database.create_failed',
+                "Impossible de créer la base de données « {$database} », veuillez vérifier les droits utilisateurs.",
+                ['database' => $database],
+                422,
                 $exception,
             );
         }
@@ -143,8 +144,9 @@ final class DatabaseSetup
         $written = @file_put_contents($this->envPath, implode("\n", $lines) . "\n", LOCK_EX);
 
         if ($written === false) {
-            throw new RuntimeException(
-                'Impossible d\'écrire le fichier .env : vérifiez les droits d\'écriture du dossier "back".'
+            throw new ApiException(
+                'database.env_not_writable',
+                'Impossible d\'écrire le fichier .env : vérifiez les droits d\'écriture du dossier "back".',
             );
         }
 
@@ -180,15 +182,17 @@ final class DatabaseSetup
         return true;
     }
 
-    private function connectionMessage(PDOException $exception): string
+    private function connectionError(PDOException $exception): ApiException
     {
         $message = $exception->getMessage();
 
-        return match (true) {
-            str_contains($message, '[1045]') => 'Identifiants incorrects : utilisateur ou mot de passe refusé par le serveur.',
-            str_contains($message, '[2002]'), str_contains($message, '[2006]') => 'Serveur de base de données injoignable : vérifiez l\'hôte et le port.',
-            str_contains($message, '[1044]') => 'Cet utilisateur n\'a pas accès à cette base.',
-            default => 'Connexion à la base de données impossible.',
+        [$code, $text] = match (true) {
+            str_contains($message, '[1045]') => ['database.access_denied', 'Identifiants incorrects : utilisateur ou mot de passe refusé par le serveur.'],
+            str_contains($message, '[2002]'), str_contains($message, '[2006]') => ['database.unreachable', 'Serveur de base de données injoignable : vérifiez l\'hôte et le port.'],
+            str_contains($message, '[1044]') => ['database.forbidden', 'Cet utilisateur n\'a pas accès à cette base.'],
+            default => ['database.connection_failed', 'Connexion à la base de données impossible.'],
         };
+
+        return new ApiException($code, $text, [], 422, $exception);
     }
 }

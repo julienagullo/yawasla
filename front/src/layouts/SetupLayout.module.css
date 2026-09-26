@@ -1,0 +1,72 @@
+/* Assistant d'installation : une carte centrée, plus claire que le fond de la page */
+.setup {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  max-width: none;
+  padding: 1.5rem 1rem;
+}
+
+.card {
+  width: 100%;
+  /* ~35rem sur petit écran, ~35 % de la largeur sur grand écran, plafonné à 44rem */
+  max-width: clamp(35rem, 35vw, 44rem);
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: var(--shadow);
+}
+
+.card fieldset {
+  border-color: var(--line);
+  background: transparent;
+}
+
+.card button[type='submit'],
+.card > button {
+  width: 100%;
+}
+
+.card > :global(.button) {
+  display: block;
+}
+
+/* En-tête : logo et nom du produit */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.language {
+  margin-inline-start: auto;
+  align-self: flex-start;
+}
+
+.brand p {
+  margin: 0;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.brandTagline {
+  font-size: 0.85rem;
+}
+
+.footer {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}

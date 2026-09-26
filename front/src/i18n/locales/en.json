@@ -1,0 +1,161 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "retry": "Retry",
+    "continue": "Continue",
+    "copyright": "© {year} Yawasla",
+    "language": "Language"
+  },
+  "errors": {
+    "unknown": "An error occurred."
+  },
+  "api": {
+    "database": {
+      "required_fields": "The host, database name and username are required.",
+      "invalid_port": "Invalid port.",
+      "invalid_characters": "Invalid characters in the credentials.",
+      "invalid_name": "The database name may only contain letters, digits, “_”, “-” and “$” (64 characters maximum).",
+      "access_denied": "Invalid credentials: username or password rejected by the server.",
+      "unreachable": "Database server unreachable: check the host and port.",
+      "forbidden": "This user does not have access to this database.",
+      "connection_failed": "Unable to connect to the database.",
+      "create_failed": "Unable to create the “{database}” database, please check the user’s privileges.",
+      "env_not_writable": "Unable to write the .env file: check the write permissions of the “back” folder."
+    },
+    "validation": {
+      "required": "{field}: required field.",
+      "too_long": "{field}: {max} characters maximum.",
+      "invalid_email": "Email: invalid address.",
+      "invalid_domain": "Domain: invalid format (e.g. mosque.example.org).",
+      "password_too_short": "The password must be at least {min} characters long.",
+      "password_too_long": "The password must not exceed {max} bytes."
+    },
+    "install": {
+      "organization_failed": "Unable to create the organization.",
+      "user_failed": "Unable to create the account."
+    },
+    "fields": {
+      "name": "Organization name",
+      "address": "Address",
+      "city": "City",
+      "postal_code": "Postal code",
+      "phone": "Phone",
+      "email": "Email",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "display_name": "Display name"
+    }
+  },
+  "theme": {
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme"
+  },
+  "app": {
+    "tagline": "Online newsroom for associations",
+    "unavailable": "Service unavailable",
+    "updateRequired": "Update required"
+  },
+  "public": {
+    "navLabel": "Main navigation",
+    "nav": {
+      "news": "News",
+      "media": "Media"
+    },
+    "hero": {
+      "title": "Announcements and news",
+      "intro": "Janaza, news, donation appeals: find all of your mosque’s announcements here."
+    },
+    "latest": "Latest announcements",
+    "noAnnouncements": "No announcements yet.",
+    "mediaTitle": "Media",
+    "noMedia": "No media yet.",
+    "poweredBy": "Powered by <link>Yawasla</link>"
+  },
+  "admin": {
+    "subtitle": "Administration",
+    "navLabel": "Administration menu",
+    "nav": {
+      "dashboard": "Dashboard"
+    },
+    "viewSite": "View the site",
+    "dashboard": {
+      "title": "Dashboard",
+      "intro": "Welcome to the administration area. Management of the organization, announcements and media will appear here."
+    },
+    "login": {
+      "title": "Sign in",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Sign in"
+    }
+  },
+  "install": {
+    "subtitle": "Setup wizard",
+    "subtitleWithVersion": "Setup wizard - v{version}",
+    "stepsLabel": "Installation steps",
+    "steps": {
+      "database": "Database",
+      "migrations": "Migrations",
+      "organization": "Organization",
+      "user": "User",
+      "done": "Done"
+    },
+    "database": {
+      "detectedTitle": "Database detected ✓",
+      "detectedText": "The “{name}” database is accessible. Yawasla will now create its tables in it.",
+      "unknownTitle": "Database not found",
+      "unknownText": "The “{name}” database does not exist on the server or is misspelled. The wizard can create it using the credentials from the <code>.env</code> file. If the name is wrong, fix <code>DB_DATABASE</code> in that file, then reload the page.",
+      "create": "Create the database",
+      "creating": "Creating…",
+      "title": "Database connection",
+      "intro": "Enter your MySQL / MariaDB database credentials. If the database does not exist, Yawasla will try to create it.",
+      "host": "Host",
+      "port": "Port",
+      "name": "Database name",
+      "username": "Username",
+      "password": "Password",
+      "connecting": "Connecting…"
+    },
+    "migrations": {
+      "title": "Creating the tables",
+      "intro": {
+        "one": "The following migration will be applied to the database.",
+        "other": "The following migrations will be applied to the database."
+      },
+      "version": "Version {version}",
+      "submit": "Install",
+      "submitting": "Installing…"
+    },
+    "organization": {
+      "title": "Your organization",
+      "intro": "Only the name is required, you can fill in the rest later, inshAllah.",
+      "name": "Organization name *",
+      "address": "Address",
+      "postalCode": "Postal code",
+      "city": "City",
+      "phone": "Phone",
+      "email": "Contact email",
+      "domain": "Domain",
+      "submitting": "Saving…"
+    },
+    "user": {
+      "title": "Main account",
+      "intro": "This account will own the organization and have access to the administration area and all modules.",
+      "firstName": "First name *",
+      "lastName": "Last name *",
+      "displayName": "Display name",
+      "email": "Email address *",
+      "password": "Password *",
+      "confirmation": "Confirmation *",
+      "passwordTooShort": "The password must be at least {min} characters long.",
+      "passwordMismatch": "The passwords do not match.",
+      "submit": "Finish installation",
+      "submitting": "Creating…"
+    },
+    "done": {
+      "title": "Installation complete ✓",
+      "intro": "Everything went well: the database, your organization and your account are ready. You can now sign in to the administration area.",
+      "link": "Go to the administration area"
+    }
+  }
+}

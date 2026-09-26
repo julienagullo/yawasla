@@ -1,0 +1,161 @@
+{
+  "common": {
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "continue": "Continuer",
+    "copyright": "© {year} Yawasla",
+    "language": "Langue"
+  },
+  "errors": {
+    "unknown": "Une erreur est survenue."
+  },
+  "api": {
+    "database": {
+      "required_fields": "L’hôte, le nom de la base et l’utilisateur sont obligatoires.",
+      "invalid_port": "Port invalide.",
+      "invalid_characters": "Caractères invalides dans les identifiants.",
+      "invalid_name": "Le nom de la base ne peut contenir que des lettres, chiffres, « _ », « - » et « $ » (64 caractères maximum).",
+      "access_denied": "Identifiants incorrects : utilisateur ou mot de passe refusé par le serveur.",
+      "unreachable": "Serveur de base de données injoignable : vérifiez l’hôte et le port.",
+      "forbidden": "Cet utilisateur n’a pas accès à cette base.",
+      "connection_failed": "Connexion à la base de données impossible.",
+      "create_failed": "Impossible de créer la base de données « {database} », veuillez vérifier les droits utilisateurs.",
+      "env_not_writable": "Impossible d’écrire le fichier .env : vérifiez les droits d’écriture du dossier « back »."
+    },
+    "validation": {
+      "required": "{field} : champ obligatoire.",
+      "too_long": "{field} : {max} caractères maximum.",
+      "invalid_email": "E-mail : adresse invalide.",
+      "invalid_domain": "Domaine : format invalide (ex. mosquee.example.org).",
+      "password_too_short": "Le mot de passe doit contenir au moins {min} caractères.",
+      "password_too_long": "Le mot de passe ne doit pas dépasser {max} octets."
+    },
+    "install": {
+      "organization_failed": "Création de l’organisme impossible.",
+      "user_failed": "Création du compte impossible."
+    },
+    "fields": {
+      "name": "Nom de l’organisme",
+      "address": "Adresse",
+      "city": "Ville",
+      "postal_code": "Code postal",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "first_name": "Prénom",
+      "last_name": "Nom",
+      "display_name": "Nom d’affichage"
+    }
+  },
+  "theme": {
+    "toLight": "Passer au thème clair",
+    "toDark": "Passer au thème sombre"
+  },
+  "app": {
+    "tagline": "Newsroom en ligne pour associations",
+    "unavailable": "Service indisponible",
+    "updateRequired": "Mise à jour requise"
+  },
+  "public": {
+    "navLabel": "Navigation principale",
+    "nav": {
+      "news": "Actualités",
+      "media": "Médias"
+    },
+    "hero": {
+      "title": "Annonces et actualités",
+      "intro": "Janaza, actualités, appels au don : retrouvez ici toutes les annonces de votre mosquée."
+    },
+    "latest": "Dernières annonces",
+    "noAnnouncements": "Aucune annonce pour le moment.",
+    "mediaTitle": "Médias",
+    "noMedia": "Aucun média pour le moment.",
+    "poweredBy": "Propulsé par <link>Yawasla</link>"
+  },
+  "admin": {
+    "subtitle": "Administration",
+    "navLabel": "Menu de l’administration",
+    "nav": {
+      "dashboard": "Tableau de bord"
+    },
+    "viewSite": "Voir le site",
+    "dashboard": {
+      "title": "Tableau de bord",
+      "intro": "Bienvenue dans l’administration. La gestion de l’organisme, des annonces et des médias arrivera ici."
+    },
+    "login": {
+      "title": "Connexion",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "submit": "Se connecter"
+    }
+  },
+  "install": {
+    "subtitle": "Assistant d’installation",
+    "subtitleWithVersion": "Assistant d’installation - v{version}",
+    "stepsLabel": "Étapes de l’installation",
+    "steps": {
+      "database": "Base de données",
+      "migrations": "Migrations",
+      "organization": "Organisme",
+      "user": "Utilisateur",
+      "done": "Terminé"
+    },
+    "database": {
+      "detectedTitle": "Base de données détectée ✓",
+      "detectedText": "La base « {name} » est accessible. Yawasla va maintenant y créer ses tables.",
+      "unknownTitle": "Base de données introuvable",
+      "unknownText": "La base « {name} » n’existe pas sur le serveur ou est mal nommée. L’assistant peut la créer avec les identifiants du fichier <code>.env</code>. Si le nom est incorrect, corrigez <code>DB_DATABASE</code> dans ce fichier puis rechargez la page.",
+      "create": "Créer la base",
+      "creating": "Création…",
+      "title": "Connexion à la base de données",
+      "intro": "Renseignez les identifiants de votre base MySQL / MariaDB. Si la base n’existe pas, Yawasla essaiera de la créer.",
+      "host": "Hôte",
+      "port": "Port",
+      "name": "Nom de la base",
+      "username": "Utilisateur",
+      "password": "Mot de passe",
+      "connecting": "Connexion…"
+    },
+    "migrations": {
+      "title": "Création des tables",
+      "intro": {
+        "one": "La migration suivante va être appliquée à la base de données.",
+        "other": "Les migrations suivantes vont être appliquées à la base de données."
+      },
+      "version": "Version {version}",
+      "submit": "Installer",
+      "submitting": "Installation…"
+    },
+    "organization": {
+      "title": "Votre organisme",
+      "intro": "Seul le nom est obligatoire, vous pourrez compléter le reste plus tard inchAllah.",
+      "name": "Nom de l’organisme *",
+      "address": "Adresse",
+      "postalCode": "Code postal",
+      "city": "Ville",
+      "phone": "Téléphone",
+      "email": "E-mail de contact",
+      "domain": "Domaine",
+      "submitting": "Enregistrement…"
+    },
+    "user": {
+      "title": "Compte principal",
+      "intro": "Ce compte sera le propriétaire de l’organisme et donnera accès à l’administration et à tous les modules.",
+      "firstName": "Prénom *",
+      "lastName": "Nom *",
+      "displayName": "Nom d’affichage",
+      "email": "Adresse e-mail *",
+      "password": "Mot de passe *",
+      "confirmation": "Confirmation *",
+      "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "submit": "Terminer l’installation",
+      "submitting": "Création…"
+    },
+    "done": {
+      "title": "Installation terminée ✓",
+      "intro": "Tout s’est bien passé : la base de données, votre organisme et votre compte sont prêts. Vous pouvez maintenant vous connecter à l’administration.",
+      "link": "Accéder à l’administration"
+    }
+  }
+}

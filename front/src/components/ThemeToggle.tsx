@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { applyTheme, currentTheme, type Theme } from '../theme/theme'
+import styles from './ThemeToggle.module.css'
+import { t } from '../i18n/i18n'
 
 // Icônes Bootstrap Icons (MIT), reprises du site vitrine
 function MoonIcon() {
@@ -32,9 +34,9 @@ export default function ThemeToggle() {
   return (
     <button
       type="button"
-      className="theme-toggle"
+      className={styles.toggle}
       onClick={toggle}
-      aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
+      aria-label={theme === 'dark' ? t('theme.toLight') : t('theme.toDark')}
     >
       {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
     </button>

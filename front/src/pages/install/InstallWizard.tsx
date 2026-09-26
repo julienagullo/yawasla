@@ -6,8 +6,10 @@ import DoneStep from './steps/DoneStep'
 import MigrationsStep from './steps/MigrationsStep'
 import OrganizationStep from './steps/OrganizationStep'
 import UserStep from './steps/UserStep'
+import styles from './InstallWizard.module.css'
+import { t } from '../../i18n/i18n'
 
-const STEPS = ['Base de données', 'Migrations', 'Organisme', 'Utilisateur', 'Terminé']
+const STEPS = ['database', 'migrations', 'organization', 'user', 'done'] as const
 
 interface Props {
   status: StatusResponse
@@ -36,17 +38,21 @@ export default function InstallWizard({ status, onProgress }: Props) {
 
   return (
     <SetupLayout
-      subtitle={`Assistant d’installation${status.target_version ? ` - v${status.target_version}` : ''}`}
+      subtitle={
+        status.target_version
+          ? t('install.subtitleWithVersion', { version: status.target_version })
+          : t('install.subtitle')
+      }
     >
-      <ol className="stepper" aria-label="Étapes de l’installation">
-        {STEPS.map((label, index) => (
+      <ol className={styles.stepper} aria-label={t('install.stepsLabel')}>
+        {STEPS.map((step, index) => (
           <li
-            key={label}
+            key={step}
             aria-current={index === current ? 'step' : undefined}
             data-state={isDone(index) ? 'done' : undefined}
           >
-            <span className="stepper-dot">{isDone(index) ? '✓' : index + 1}</span>
-            <span className="stepper-label">{label}</span>
+            <span className={styles.dot}>{isDone(index) ? '✓' : index + 1}</span>
+            <span className={styles.label}>{t(`install.steps.${step}`)}</span>
           </li>
         ))}
       </ol>

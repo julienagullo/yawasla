@@ -1,10 +1,17 @@
 import { useState } from 'react'
+import { errorMessage } from '../api/client'
 
 // Exécute une action asynchrone en suivant son état (en cours / erreur affichable).
 // run() renvoie true si l'action a réussi.
 export function useAsyncAction() {
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // Fonction plutôt que texte : le message est recalculé à chaque rendu et suit un changement de langue
+  const [failure, setFailure] = useState<(() => string) | null>(null)
+
+  function setError(message: (() => string) | null) {
+    // Enveloppée : passée telle quelle, React la prendrait pour une fonction de mise à jour
+    setFailure(() => message)
+  }
 
   async function run(action: () => Promise<unknown>): Promise<boolean> {
     setError(null)
@@ -13,12 +20,12 @@ export function useAsyncAction() {
       await action()
       return true
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Une erreur est survenue.')
+      setError(() => errorMessage(e))
       return false
     } finally {
       setPending(false)
     }
   }
 
-  return { pending, error, setError, run }
+  return { pending, error: failure?.() ?? null, setError, run }
 }

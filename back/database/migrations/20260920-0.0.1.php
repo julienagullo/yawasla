@@ -49,11 +49,13 @@ return function (Medoo $db): void {
     $db->create('media', [
         '@id',
         'organization_id' => ['BIGINT', 'NOT NULL'],
+        'author_id' => ['BIGINT', 'NULL'],
         'title' => ['VARCHAR(255)', 'NOT NULL'],
         'description' => ['TEXT', 'NULL'],
-        'audio_path' => ['VARCHAR(255)', 'NOT NULL'],
+        'media_path' => ['VARCHAR(255)', 'NOT NULL'],
         'status' => ['VARCHAR(20)', 'NOT NULL', "DEFAULT 'draft'"],
         'published_at' => ['DATETIME', 'NULL'],
         'FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE CASCADE',
+        'FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE',
     ], $options);
 };

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { createOrganization } from '../../../api/install'
 import { useAsyncAction } from '../../../hooks/useAsyncAction'
+import { t } from '../../../i18n/i18n'
 
 export default function OrganizationStep({ onProgress }: { onProgress: () => void }) {
   const { pending, error, run } = useAsyncAction()
@@ -30,17 +31,17 @@ export default function OrganizationStep({ onProgress }: { onProgress: () => voi
 
   return (
     <>
-      <h1>Votre organisme</h1>
-      <p>Seul le nom est obligatoire, vous pourrez compléter le reste plus tard inchAllah.</p>
+      <h1>{t('install.organization.title')}</h1>
+      <p>{t('install.organization.intro')}</p>
 
       <form onSubmit={handleSubmit}>
         <fieldset disabled={pending}>
           <label>
-            Nom de l’organisme *
+            {t('install.organization.name')}
             <input required value={name} onChange={(e) => setName(e.target.value)} />
           </label>
           <label>
-            Adresse
+            {t('install.organization.address')}
             <input
               autoComplete="street-address"
               value={address}
@@ -49,7 +50,7 @@ export default function OrganizationStep({ onProgress }: { onProgress: () => voi
           </label>
           <div className="field-row">
             <label>
-              Code postal
+              {t('install.organization.postalCode')}
               <input
                 autoComplete="postal-code"
                 value={postalCode}
@@ -57,7 +58,7 @@ export default function OrganizationStep({ onProgress }: { onProgress: () => voi
               />
             </label>
             <label>
-              Ville
+              {t('install.organization.city')}
               <input
                 autoComplete="address-level2"
                 value={city}
@@ -67,16 +68,16 @@ export default function OrganizationStep({ onProgress }: { onProgress: () => voi
           </div>
           <div className="field-row">
             <label>
-              Téléphone
+              {t('install.organization.phone')}
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </label>
             <label>
-              E-mail de contact
+              {t('install.organization.email')}
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </label>
           </div>
           <label>
-            Domaine
+            {t('install.organization.domain')}
             <input value={domain} onChange={(e) => setDomain(e.target.value)} />
           </label>
         </fieldset>
@@ -84,7 +85,7 @@ export default function OrganizationStep({ onProgress }: { onProgress: () => voi
         {error && <p role="alert">{error}</p>}
 
         <button type="submit" disabled={pending}>
-          {pending ? 'Enregistrement…' : 'Continuer'}
+          {pending ? t('install.organization.submitting') : t('common.continue')}
         </button>
       </form>
     </>

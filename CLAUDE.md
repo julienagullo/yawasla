@@ -44,9 +44,9 @@ Colonnes = propriétés publiques typées de l'entité (snake_case, même nom qu
 `Organization`, `User`, `Announcement`, `Media` — schéma exact dans `database/migrations/` et les classes elles-mêmes, pas dupliqué ici. Décisions notables non visibles dans le code :
 - `User.role` : simple colonne (`owner`/`admin`/`user`), pas de tables `roles`/`permissions` dédiées pour la bêta
 - `Announcement.type` : VARCHAR libre pour le regroupement (janaza/actualité/don...), pas de champs structurés par type
-- `Media` : indépendant des annonces, pas un attachement — confirmé par le cahier des charges ("Média" est un type de contenu à part, comme "Prières")
+- `Media` : indépendant des annonces, pas un attachement — confirmé par le cahier des charges ("Média" est un type de contenu à part, comme "Prières"). Volontairement générique (`media_path`, pas `audio_path`) : audio pour la bêta, mais réutilisable plus tard (galeries d'images…)
 - `Organization.domain` : `Organization::forDomain($host)` retourne l'organization dont le domaine correspond, sinon la première créée (fallback) — couvre nativement le cas mono-organisme actuel de la bêta tout en restant utilisable en multi-organisme (auto-hébergement) sans logique supplémentaire
-- Contraintes `FOREIGN KEY` en DB (via fragments SQL bruts dans `create()`, ex. `'FOREIGN KEY (x) REFERENCES y(id) ON DELETE ... ON UPDATE ...'`) : `organization_id` en `ON DELETE CASCADE` (supprimer une organization supprime son contenu), `announcements.author_id` en `ON DELETE SET NULL` (supprimer un `User` garde ses annonces, sans auteur — d'où `author_id` nullable), `ON UPDATE CASCADE` partout
+- Contraintes `FOREIGN KEY` en DB (via fragments SQL bruts dans `create()`, ex. `'FOREIGN KEY (x) REFERENCES y(id) ON DELETE ... ON UPDATE ...'`) : `organization_id` en `ON DELETE CASCADE` (supprimer une organization supprime son contenu), `announcements.author_id` et `media.author_id` en `ON DELETE SET NULL` (supprimer un `User` garde ses contenus, sans auteur — d'où `author_id` nullable), `ON UPDATE CASCADE` partout
 - Les colonnes `*_id` doivent être `BIGINT` (pas `INT`) pour matcher le type généré par `'@id'` sur MySQL (`BIGINT AUTO_INCREMENT`) — sinon la contrainte FK est rejetée (type incompatible), erreur qui n'apparaît que sur MySQL, pas sqlite (typage dynamique)
 - **sqlite n'applique pas les FK par défaut** : `PRAGMA foreign_keys = ON` exécuté sur la connexion sqlite au bootstrap, sinon les contraintes existent dans le schéma mais ne sont jamais vérifiées (silencieux, aucune erreur)
 
@@ -83,14 +83,28 @@ Une installation fraîche est traitée comme une mise à jour depuis la version 
 - **Garde-fou de cohérence** : une table `version` absente ou vide ne veut dire "jamais installé" que si `organizations` et `users` ne contiennent aucune donnée. Sinon, `Migrator::currentVersion()` lève une exception au lieu de relancer l'installation sur un site qui a déjà des données. Une installation interrompue en pleine migration (tables créées, ligne `version` non écrite) reste rejouable, les migrations utilisant `IF NOT EXISTS`. `currentVersion()` lit directement la table `version` et n'analyse la base qu'en cas d'échec de la lecture
 - **Migrations** : fichiers PHP dans `back/database/migrations/`, nommés `AAAAMMJJ-x.y.z.php` (ex. `20260920-1.0.0.php`) — la date est une convention de lisibilité/traçabilité, seul le numéro de version après le tiret sert à l'ordonnancement (`uksort` + `version_compare`) et à la comparaison. Chaque fichier retourne une closure `function (Medoo $db): void` qui utilise l'API de Medoo (`create()`, la syntaxe `'@id'` pour les colonnes identité, etc.) plutôt que du SQL brut, pour rester portable entre mysql et sqlite (ex. gestion différente de l'auto-increment selon le moteur)
 - **`Yawasla\Core\Migrator`** : lit la version courante, détermine les migrations en attente (`version_compare($version, $courante, '>') && version_compare($version, $cible, '<=')`), les exécute dans l'ordre croissant, insère une ligne `version` après chacune
-- **Aiguillage au boot, 4 états** (`src/bootstrap.php`), toutes les routes sont préfixées par la constante `APP_API_PREFIX` (définie dans `public/index.php`, `/api`) et le chemin de base (alias/sous-dossier Apache) est déduit de `SCRIPT_NAME` :
-  - base inutilisable → `src/setup-routes.php` (état `config_required`) : `no_env` (pas de `.env`, l'assistant recueille les identifiants via `POST /api/install/database`, crée la base si besoin et écrit le `.env` en 0600) ou `unknown_database` (`.env` présent, erreur MySQL 1049 → l'assistant crée la base avec les identifiants du `.env`). **Toute autre erreur de connexion reste un 503** : ouvrir l'assistant lors d'une simple panne MySQL sur un site installé permettrait à n'importe qui de réécrire la config. Base créée en `utf8mb4` / `utf8mb4_unicode_ci` (`0900_ai_ci` n'existe pas sous MariaDB) ; `Schema::tableOptions()` impose aussi cette collation à chaque table (indépendante de celle de la base) et l'installation tente `ALTER DATABASE` si la base est dans un autre charset (non bloquant)
-  - installation à faire → `src/install-routes.php` (état `install_required`, avec un `step` déduit de la base, ce qui permet de reprendre après une interruption ; chaque étape n'expose que sa propre route, les autres répondent 404) : `migrations` (`dbVersion === '0.0.0'` → `POST /install/migrate`), `organization` (tables à jour, aucun `User` ni `Organization` → `POST /install/organization`, seul le nom est obligatoire), `user` (organisme créé, aucun `User` → `POST /install/user`, crée le premier compte avec le rôle `owner` : `first_name`, `last_name`, `display_name`, `email`, mot de passe ≥ 8 caractères et ≤ 72 octets, bcrypt). Limite assumée : supprimer à la main tous les utilisateurs d'un site n'ayant qu'un organisme rouvre l'étape `user`. Front : assistant en 5 étapes (base de données, migrations, organisme, utilisateur, terminé), l'étape affichée est toujours celle renvoyée par le back
-  - `version_compare(dbVersion, APP_VERSION, '<')` → `src/update-routes.php` (exécute uniquement les migrations en attente, ne redemande jamais organisme/admin)
-  - `dbVersion === APP_VERSION` → `src/routes.php` (fonctionnement normal)
+- **Aiguillage au boot, 4 états** (`src/bootstrap.php`, un fichier de routes par état) : `config_required` (pas de `.env` ou base inexistante, erreur 1049), `install_required` (étape déduite de la base, reprise possible après interruption), `update_required`, normal. Toute autre erreur de connexion reste un **503** : ouvrir l'assistant lors d'une panne MySQL permettrait à n'importe qui de réécrire la config. Collation `utf8mb4_unicode_ci` (`0900_ai_ci` n'existe pas sous MariaDB)
 - **Cache de routes** : n'est activé que dans l'état "normal" (`dbVersion === APP_VERSION` et `!APP_ENV=dev`) — pendant install/update, l'ensemble de routes chargé change selon l'état de la DB, un cache figé sur le mauvais ensemble resterait servi indéfiniment après transition d'état
 
 Séquence de boot : env → `Config` → `Logger` → connexion `Medoo` → `Model::setConnection()` → `Container` → App Slim → routes → `run()`
+
+## Distribution et passerelle PHP → React
+
+- **Point d'entrée unique** `public/index.php` : `/api/*` → Slim, tout le reste → `AppShell` sert `resources/app.html` (index.html de Vite, distribution uniquement) en injectant à la place de `<!-- yawasla:boot -->` un `<base href>` et un JSON (`basePath`, `apiBase`, `status` de `GET /api/`). La sous-requête vers `/api/` doit être une requête neuve (sinon Slim réutilise le routage courant → boucle infinie)
+- **Front** : `src/app/boot.ts` lit ces données, toutes optionnelles (absentes en dev avec Vite). Build en `base: './'` → marche à la racine comme en sous-dossier
+- **Release** : `node scripts/release.mjs [--allow-dirty]` → `dist/yawasla-x.y.z.zip` + `.sha256`, version lue dans `APP_VERSION`, arbre git propre exigé. Assemblage isolé dans `build/` (supprimé si succès) : `npm ci` + build du front, `composer install --no-dev`, `php -l`, ZIP sans dépendance. Composer hors PATH : `COMPOSER_BIN`
+- **Sécurité** : racine du site sur `public/` ; `back/.htaccess` (`Require all denied`) protège le reste si tout est déposé à la racine, `public/.htaccess` réautorise
+
+## Internationalisation (i18n)
+
+Lancement en France (fr uniquement), mais multilingue prévu dès maintenant, arabe compris. Socle en place, assistant d’installation migré.
+
+- **Back** : ne traduit rien, les erreurs affichables sont des `ApiException` (code, message fr, params, statut) rendues en `{ "error": { "code", "params", "message" } }` — le front traduit via la clé `api.<code>` (param `field` traduit via `api.fields`), `message` sert de fallback. Exception future : les mails
+- **Front** : dictionnaire maison sans dépendance dans `src/i18n/` — interface `Messages` à part (`messages.ts`), `locales/{en,fr}.json` typés via `const fr: Messages = frJson`, `t()` dans `i18n.ts` (fr par défaut, `lang`/`dir` sur `<html>`, choix du sélecteur mémorisé en `localStorage`, changement à chaud via `useLocale()` dans `App` et `LocaleRoot` du routeur, qui remonte les pages car les éléments de route sont créés une fois et jamais re-rendus), pluriels via `Intl.PluralRules`, dates/nombres via `Intl`
+- **Interpolation** `{name}` en une seule passe (callback), sinon une valeur contenant `{autre}` serait remplacée à son tour
+- **`<Trans>`** (`src/i18n/`, pas de rendu propre) : phrase entière avec balises dans le JSON, `components={{ code: <code /> }}`. Découpage `split(/<(\w+)>([\s\S]*?)<\/\1>/)`, balises non déclarées = texte, pas d'attributs ni d'imbrication, jamais de `dangerouslySetInnerHTML`, interpolation après découpage
+- **Langue** : interface (navigateur à l'install, `User.locale` en admin, `Organization.locale` en public) ≠ contenu (annonces non traduites)
+- **RTL** : propriétés CSS logiques (`inset-inline-end`…) plutôt que `left`/`right` ; police arabe à prévoir (Fraunces/Inter sans glyphes arabes)
 
 ## Périmètre fonctionnel de la bêta
 
@@ -116,7 +130,9 @@ Ne pas développer sans demande explicite : tout ce qui n'est pas listé ci-dess
 
 ### T1 2027
 
-- [ ] Mise en place du socle technique (installation PHP/Composer, structure projet, connexion base de données)
+- [x] Mise en place du socle technique (installation PHP/Composer, structure projet, connexion base de données)
+- [x] Système d'installation de la base de données + création organisme et utilisateur principal
+- [ ] Tests d'installation (vérifier la facilité de mise en place pour un développeur débutant)
 - [ ] Système d'authentification (formulaire de connexion, mot de passe oublié, mail d'alerte)
 - [ ] Architecture des rôles/permissions (base technique pour le multi-utilisateur)
 - [ ] Module gestion de l'organisme (back-office)
@@ -125,7 +141,6 @@ Ne pas développer sans demande explicite : tout ce qui n'est pas listé ci-dess
 - [ ] Front-office : page newsroom publique (bandeau, infos organisme, liste des annonces)
 - [ ] Front-office : formulaire d'inscription aux notifications push
 - [ ] Front-office : page mention légale dynamique
-- [ ] Tests d'installation (vérifier la facilité de mise en place pour un développeur débutant)
 - [x] Page statique de présentation sur le domaine yawasla.org (préparer le référencement)
 
 ### T2 2027

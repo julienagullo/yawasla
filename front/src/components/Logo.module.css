@@ -1,0 +1,5 @@
+.logo {
+  flex: none;
+  object-fit: cover;
+  user-select: none;
+}

@@ -1,5 +1,7 @@
 import { runMigrations } from '../../../api/install'
 import { useAsyncAction } from '../../../hooks/useAsyncAction'
+import styles from './MigrationsStep.module.css'
+import { t } from '../../../i18n/i18n'
 
 interface Props {
   migrations: string[]
@@ -11,12 +13,12 @@ export default function MigrationsStep({ migrations, onProgress }: Props) {
 
   return (
     <>
-      <h1>Création des tables</h1>
-      <p>Les migrations suivantes vont être appliquées à la base de données.</p>
+      <h1>{t('install.migrations.title')}</h1>
+      <p>{t('install.migrations.intro', { count: migrations.length })}</p>
 
-      <ul className="checklist">
+      <ul className={styles.checklist}>
         {migrations.map((version) => (
-          <li key={version}>Version {version}</li>
+          <li key={version}>{t('install.migrations.version', { version })}</li>
         ))}
       </ul>
 
@@ -27,7 +29,7 @@ export default function MigrationsStep({ migrations, onProgress }: Props) {
         disabled={pending}
         onClick={() => void run(runMigrations).then((ok) => ok && onProgress())}
       >
-        {pending ? 'Installation…' : 'Installer'}
+        {pending ? t('install.migrations.submitting') : t('install.migrations.submit')}
       </button>
     </>
   )

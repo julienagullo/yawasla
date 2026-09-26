@@ -11,6 +11,7 @@ The project is built around a minimal, lightweight open-source core (Apache 2.0 
 ## Table of contents
 
 - [Quick start](#quick-start)
+- [Building a release](#building-a-release)
 - [Tech stack](#tech-stack)
 - [Roadmap](#roadmap)
 - [Contact](#contact)
@@ -40,6 +41,33 @@ Then edit `.env` with your database credentials.
 #### Frontend
 
 Not initialized yet — the frontend will be a React app compiled via npm.
+
+## Building a release
+
+The release script builds a clean, ready-to-install archive (compiled frontend, production PHP dependencies, no dev files).
+
+#### Requirements
+
+- Node 22+ and npm
+- PHP and Composer (if Composer is not in your `PATH`, e.g. a shell alias, point to it with `COMPOSER_BIN=/path/to/composer.phar`)
+
+#### Steps
+
+1. Set the version in `back/public/index.php` (`define('APP_VERSION', 'x.y.z')`), with a matching migration in `back/database/migrations/` if the database schema changed
+2. Commit your changes: the script refuses to run on a dirty working tree, so that every archive matches a commit
+3. From the project root, run:
+
+```
+node scripts/release.mjs
+```
+
+This produces `dist/yawasla-x.y.z.zip` and its SHA-256 checksum `dist/yawasla-x.y.z.zip.sha256` (`dist/` is not versioned). Optionally, tag the commit (`git tag vx.y.z`) and attach both files to a GitHub release.
+
+For a test build including uncommitted changes, add `--allow-dirty`.
+
+#### Deployment
+
+Unzip the archive on the server and point the site's document root to the `public/` folder, then open the site: the installation wizard takes over. SSL is required.
 
 ## Tech stack
 

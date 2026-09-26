@@ -1,0 +1,8 @@
+.empty {
+  margin: 0;
+  padding: 2rem 1.25rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  text-align: center;
+}

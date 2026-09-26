@@ -1,0 +1,4 @@
+# Seul public/ doit être exposé au web (racine du site à faire pointer sur public/).
+# Si l'application entière est déposée dans la racine du site, rien d'autre ne doit être
+# accessible : .env (identifiants de la base), src/, vendor/, var/ (logs)…
+Require all denied

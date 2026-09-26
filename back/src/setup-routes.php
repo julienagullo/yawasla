@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Exception\HttpException;
 use Slim\Interfaces\RouteCollectorProxyInterface;
+use Yawasla\Core\ApiException;
 use Yawasla\Core\Config;
 use Yawasla\Core\DatabaseSetup;
 
@@ -52,26 +52,23 @@ return static function (RouteCollectorProxyInterface $app, string $reason, Confi
             ];
 
             if ($credentials['host'] === '' || $credentials['database'] === '' || $credentials['username'] === '') {
-                throw new HttpException($request, 'L\'hôte, le nom de la base et l\'utilisateur sont obligatoires.', 422);
+                throw new ApiException('database.required_fields', 'L\'hôte, le nom de la base et l\'utilisateur sont obligatoires.');
             }
 
             if ($credentials['port'] < 1 || $credentials['port'] > 65535) {
-                throw new HttpException($request, 'Port invalide.', 422);
+                throw new ApiException('database.invalid_port', 'Port invalide.');
             }
 
             if (preg_match('/[\r\n\0]/', implode('', $credentials)) === 1) {
-                throw new HttpException($request, 'Caractères invalides dans les identifiants.', 422);
+                throw new ApiException('database.invalid_characters', 'Caractères invalides dans les identifiants.');
             }
         }
 
-        try {
-            $created = $setup->prepareDatabase($credentials);
+        // Erreurs affichables levées en ApiException, toute autre erreur (PDO…) reste une 500
+        $created = $setup->prepareDatabase($credentials);
 
-            if ($reason === 'no_env') {
-                $setup->writeEnv($credentials);
-            }
-        } catch (RuntimeException $exception) {
-            throw new HttpException($request, $exception->getMessage(), 422, $exception);
+        if ($reason === 'no_env') {
+            $setup->writeEnv($credentials);
         }
 
         return $json($response, ['status' => 'configured', 'created' => $created]);

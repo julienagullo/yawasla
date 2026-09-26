@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { configureDatabase } from '../../../api/install'
 import type { StatusResponse } from '../../../api/status'
 import { useAsyncAction } from '../../../hooks/useAsyncAction'
+import { t } from '../../../i18n/i18n'
+import Trans from '../../../i18n/Trans'
 
 interface Props {
   status: StatusResponse
@@ -22,12 +24,10 @@ export default function DatabaseStep({ status, detected, onContinue, onProgress 
   if (detected) {
     return (
       <>
-        <h1>Base de données détectée ✓</h1>
-        <p>
-          La base « {status.database} » est accessible. Yawasla va maintenant y créer ses tables.
-        </p>
+        <h1>{t('install.database.detectedTitle')}</h1>
+        <p>{t('install.database.detectedText', { name: status.database ?? '' })}</p>
         <button type="button" onClick={onContinue}>
-          Continuer
+          {t('common.continue')}
         </button>
       </>
     )
@@ -36,10 +36,13 @@ export default function DatabaseStep({ status, detected, onContinue, onProgress 
   if (status.reason === 'unknown_database') {
     return (
       <>
-        <h1>Base de données introuvable</h1>
+        <h1>{t('install.database.unknownTitle')}</h1>
         <p>
-          La base « {status.database} » n’existe pas sur le serveur. Yawasla peut la créer avec les
-          identifiants déjà configurés.
+          <Trans
+            k="install.database.unknownText"
+            values={{ name: status.database ?? '' }}
+            components={{ code: <code /> }}
+          />
         </p>
         {error && <p role="alert">{error}</p>}
         <button
@@ -47,7 +50,7 @@ export default function DatabaseStep({ status, detected, onContinue, onProgress 
           disabled={pending}
           onClick={() => void run(configureDatabase).then((ok) => ok && onProgress())}
         >
-          {pending ? 'Création…' : 'Créer la base'}
+          {pending ? t('install.database.creating') : t('install.database.create')}
         </button>
       </>
     )
@@ -68,20 +71,17 @@ export default function DatabaseStep({ status, detected, onContinue, onProgress 
 
   return (
     <>
-      <h1>Connexion à la base de données</h1>
-      <p>
-        Renseignez les identifiants de votre base MySQL / MariaDB. Si la base n’existe pas, Yawasla
-        essaiera de la créer.
-      </p>
+      <h1>{t('install.database.title')}</h1>
+      <p>{t('install.database.intro')}</p>
 
       <form onSubmit={handleSubmit}>
         <fieldset disabled={pending}>
           <label>
-            Hôte
+            {t('install.database.host')}
             <input required value={host} onChange={(e) => setHost(e.target.value)} />
           </label>
           <label>
-            Port
+            {t('install.database.port')}
             <input
               type="number"
               required
@@ -92,11 +92,11 @@ export default function DatabaseStep({ status, detected, onContinue, onProgress 
             />
           </label>
           <label>
-            Nom de la base
+            {t('install.database.name')}
             <input required value={name} onChange={(e) => setName(e.target.value)} />
           </label>
           <label>
-            Utilisateur
+            {t('install.database.username')}
             <input
               required
               autoComplete="username"
@@ -105,7 +105,7 @@ export default function DatabaseStep({ status, detected, onContinue, onProgress 
             />
           </label>
           <label>
-            Mot de passe
+            {t('install.database.password')}
             <input
               type="password"
               autoComplete="current-password"
@@ -118,7 +118,7 @@ export default function DatabaseStep({ status, detected, onContinue, onProgress 
         {error && <p role="alert">{error}</p>}
 
         <button type="submit" disabled={pending}>
-          {pending ? 'Connexion…' : 'Continuer'}
+          {pending ? t('install.database.connecting') : t('common.continue')}
         </button>
       </form>
     </>

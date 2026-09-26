@@ -1,0 +1,45 @@
+/* Icônes superposées au select natif, qui garde tout le comportement (clavier, lecteurs d'écran) */
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-soft);
+}
+
+.select {
+  appearance: none;
+  padding-block: 0.4rem;
+  padding-inline: 2rem 1.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.select:hover {
+  border-color: var(--green);
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.globe,
+.chevron {
+  position: absolute;
+  pointer-events: none;
+}
+
+.globe {
+  inset-inline-start: 0.65rem;
+  font-size: 1rem;
+}
+
+.chevron {
+  inset-inline-end: 0.65rem;
+}

@@ -14,9 +14,10 @@ final class Media extends Model
 
     public ?int $id = null;
     public int $organization_id;
+    public ?int $author_id = null;
     public string $title;
     public ?string $description = null;
-    public string $audio_path;
+    public string $media_path;
     public string $status = self::STATUS_DRAFT;
     public ?DateTimeImmutable $published_at = null;
 
@@ -27,6 +28,6 @@ final class Media extends Model
 
     public static function fillable(): array
     {
-        return ['organization_id', 'title', 'description', 'audio_path', 'status', 'published_at'];
+        return ['organization_id', 'author_id', 'title', 'description', 'media_path', 'status', 'published_at'];
     }
 }

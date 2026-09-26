@@ -26,13 +26,22 @@ final class JsonErrorHandler
         bool $logErrors,
         bool $logErrorDetails,
     ): ResponseInterface {
-        $isHttpException = $exception instanceof HttpException;
-        $status = $isHttpException ? $exception->getCode() : 500;
-        $status = $status >= 400 && $status < 600 ? $status : 500;
+        if ($exception instanceof ApiException) {
+            $status = $exception->getStatus();
+            $payload = ['error' => ['code' => $exception->getErrorCode(), 'message' => $exception->getMessage()]];
 
-        $payload = $isHttpException
-            ? ['error' => ['message' => $exception->getMessage()]]
-            : $this->serverErrorPayload($exception);
+            if ($exception->getParams() !== []) {
+                $payload['error']['params'] = $exception->getParams();
+            }
+        } elseif ($exception instanceof HttpException) {
+            $status = $exception->getCode();
+            $payload = ['error' => ['message' => $exception->getMessage()]];
+        } else {
+            $status = 500;
+            $payload = $this->serverErrorPayload($exception);
+        }
+
+        $status = $status >= 400 && $status < 600 ? $status : 500;
 
         $response = $this->responseFactory->createResponse($status)
             ->withHeader('Content-Type', 'application/json');
