@@ -110,7 +110,7 @@
     },
     "database": {
       "detectedTitle": "Database detected ✓",
-      "detectedText": "The “{name}” database is accessible. Yawasla will now create its tables in it.",
+      "detectedText": "The “{name}” database is accessible. Click “Continue” to go to the next step.",
       "unknownTitle": "Database not found",
       "unknownText": "The “{name}” database does not exist on the server or is misspelled. The wizard can create it using the credentials from the <code>.env</code> file. If the name is wrong, fix <code>DB_DATABASE</code> in that file, then reload the page.",
       "create": "Create the database",
