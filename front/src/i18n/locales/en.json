@@ -7,7 +7,12 @@
     "language": "Language"
   },
   "errors": {
-    "unknown": "An error occurred."
+    "unknown": "An error occurred.",
+    "pageTitle": "Something went wrong",
+    "pageText": "The page could not be displayed. Please try again in a moment.",
+    "notFoundTitle": "Page not found",
+    "notFoundText": "The requested page does not exist or has been moved.",
+    "backHome": "Back to home"
   },
   "api": {
     "database": {
@@ -52,8 +57,7 @@
   },
   "app": {
     "tagline": "Online newsroom for associations",
-    "unavailable": "Service unavailable",
-    "updateRequired": "Update required"
+    "unavailable": "Service unavailable"
   },
   "public": {
     "navLabel": "Main navigation",
@@ -78,6 +82,10 @@
       "dashboard": "Dashboard"
     },
     "viewSite": "View the site",
+    "update": {
+      "title": "Update required",
+      "text": "The database needs to be updated (v{current} → v{target}). The public site remains available in the meantime."
+    },
     "dashboard": {
       "title": "Dashboard",
       "intro": "Welcome to the administration area. Management of the organization, announcements and media will appear here."

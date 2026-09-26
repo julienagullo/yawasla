@@ -15,6 +15,11 @@ export interface Messages {
   }
   errors: {
     unknown: string
+    pageTitle: string
+    pageText: string
+    notFoundTitle: string
+    notFoundText: string
+    backHome: string
   }
   // Erreurs renvoyées par l'API : clé = code du back (snake_case, voir ApiException), "fields" = libellés
   // des noms de champs API reçus en paramètre `field`
@@ -62,7 +67,6 @@ export interface Messages {
   app: {
     tagline: string
     unavailable: string
-    updateRequired: string
   }
   public: {
     navLabel: string
@@ -87,6 +91,10 @@ export interface Messages {
       dashboard: string
     }
     viewSite: string
+    update: {
+      title: string
+      text: string
+    }
     dashboard: {
       title: string
       intro: string

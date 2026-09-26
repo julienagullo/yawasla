@@ -19,11 +19,6 @@ final class DatabaseSetup
     {
     }
 
-    public function hasEnvFile(): bool
-    {
-        return is_file($this->envPath);
-    }
-
     /**
      * Hôtes à essayer dans l'ordre. Avec "localhost", PDO passe par un socket Unix dont le chemin
      * dépend du php.ini (souvent faux sous MAMP/Homebrew) : en cas d'échec (erreur 2002),

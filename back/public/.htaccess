@@ -1,7 +1,3 @@
-# Toute requête qui ne correspond pas à un fichier existant est envoyée à index.php.
-# BASE = chemin de base de l'app (vide à la racine, "/yawasla" derrière un alias ou un
-# sous-dossier), déduit de l'URL pour ne pas dépendre de RewriteBase.
-# Autorise ce dossier, le .htaccess racine interdisant tout le reste de l'application
 Require all granted
 
 RewriteEngine On

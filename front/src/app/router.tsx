@@ -7,11 +7,14 @@ import NewsroomPage from '../pages/public/NewsroomPage'
 import MediaListPage from '../pages/public/MediaListPage'
 import LoginPage from '../pages/admin/LoginPage'
 import DashboardPage from '../pages/admin/DashboardPage'
+import ErrorPage from '../pages/ErrorPage'
 
 export const router = createBrowserRouter(
   [
     {
       element: <LocaleRoot />,
+      // Erreur de rendu ou URL inconnue, n'importe où dans l'application
+      errorElement: <ErrorPage />,
       children: [
         // Front-office : newsroom publique
         {

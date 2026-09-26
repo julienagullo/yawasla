@@ -7,7 +7,12 @@
     "language": "Langue"
   },
   "errors": {
-    "unknown": "Une erreur est survenue."
+    "unknown": "Une erreur est survenue.",
+    "pageTitle": "Une erreur est survenue",
+    "pageText": "La page n’a pas pu s’afficher. Réessayez dans quelques instants.",
+    "notFoundTitle": "Page introuvable",
+    "notFoundText": "La page demandée n’existe pas ou a été déplacée.",
+    "backHome": "Retour à l’accueil"
   },
   "api": {
     "database": {
@@ -52,8 +57,7 @@
   },
   "app": {
     "tagline": "Newsroom en ligne pour associations",
-    "unavailable": "Service indisponible",
-    "updateRequired": "Mise à jour requise"
+    "unavailable": "Service indisponible"
   },
   "public": {
     "navLabel": "Navigation principale",
@@ -78,6 +82,10 @@
       "dashboard": "Tableau de bord"
     },
     "viewSite": "Voir le site",
+    "update": {
+      "title": "Mise à jour requise",
+      "text": "La base de données doit être mise à jour (v{current} → v{target}). Le site public reste accessible en attendant."
+    },
     "dashboard": {
       "title": "Tableau de bord",
       "intro": "Bienvenue dans l’administration. La gestion de l’organisme, des annonces et des médias arrivera ici."

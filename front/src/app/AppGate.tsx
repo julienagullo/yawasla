@@ -4,6 +4,7 @@ import { fetchStatus, type StatusResponse } from '../api/status'
 import InstallWizard from '../pages/install/InstallWizard'
 import { errorMessage } from '../api/client'
 import { t } from '../i18n/i18n'
+import { AppStatusContext } from './appStatus'
 import { boot } from './boot'
 
 type State =
@@ -61,14 +62,9 @@ export default function AppGate({ children }: { children: ReactNode }) {
     case 'config_required':
     case 'install_required':
       return <InstallWizard status={state.status} onProgress={load} />
-    case 'update_required':
-      // TODO : écran de mise à jour (POST /api/update)
-      return (
-        <SetupLayout>
-          <h1>{t('app.updateRequired')}</h1>
-        </SetupLayout>
-      )
     default:
-      return <>{children}</>
+      // Y compris "update_required" : le site public reste en ligne, l'administration affiche la
+      // mise à jour (voir AdminLayout)
+      return <AppStatusContext.Provider value={state.status}>{children}</AppStatusContext.Provider>
   }
 }
