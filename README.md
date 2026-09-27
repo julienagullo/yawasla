@@ -53,17 +53,25 @@ The release script builds a clean, ready-to-install archive (compiled frontend, 
 
 #### Steps
 
-1. Set the version in `back/public/index.php` (`define('APP_VERSION', 'x.y.z')`), with a matching migration in `back/database/migrations/` if the database schema changed
-2. Commit your changes: the script refuses to run on a dirty working tree, so that every archive matches a commit
-3. From the project root, run:
+From the project root, run:
 
 ```
 node scripts/release.mjs
 ```
 
-This produces `dist/yawasla-x.y.z.zip` and its SHA-256 checksum `dist/yawasla-x.y.z.zip.sha256` (`dist/` is not versioned). Optionally, tag the commit (`git tag vx.y.z`) and attach both files to a GitHub release.
+This produces `dist/yawasla-dev.zip` and its SHA-256 checksum `dist/yawasla-dev.zip.sha256` (`dist/` is not versioned), including any uncommitted changes. A git repository is not required.
 
-For a test build including uncommitted changes, add `--allow-dirty`.
+#### Official release
+
+1. Set the version in `back/public/index.php` (`define('APP_VERSION', 'x.y.z')`), with a matching migration in `back/database/migrations/` if the database schema changed
+2. Commit your changes: with `--release`, the script refuses to run on a dirty working tree, so that every published archive matches a commit
+3. From the project root, run:
+
+```
+node scripts/release.mjs --release
+```
+
+This produces `dist/yawasla-x.y.z.zip` and `dist/yawasla-x.y.z.zip.sha256`. Optionally, tag the commit (`git tag vx.y.z`) and attach both files to a GitHub release.
 
 #### Deployment
 

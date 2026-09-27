@@ -27,40 +27,24 @@ Le périmètre fonctionnel décrit ci-dessous est volontairement restreint à ce
 
 ## Couche d'accès aux données (ORM maison)
 
-Medoo est utilisé comme query builder de base ; il retourne des tableaux bruts. Un ORM maison très simple est construit par-dessus : une classe abstraite `Model` (pattern Active Record simplifié) dont héritent les entités. Identifiants de code en anglais même si le reste du projet est documenté en français : `Organization`, `User`, `Announcement`, `Media`.
+Active Record simplifié sur Medoo : classe abstraite `Model` (`src/Core/Model.php`), entités dans `src/Entity/` (`Organization`, `User`, `Announcement`, `Media`, identifiants en anglais). Hydratation + CRUD uniquement : pas de relations, lazy loading ni unit-of-work.
 
-Portée volontairement réduite : pas de relations complexes, pas de lazy loading, pas de unit-of-work. Uniquement l'hydratation objet et le CRUD de base.
+- **Colonnes = propriétés publiques typées** (snake_case, même nom que la colonne) ; le type sert de cast dans les deux sens (`"42"` → `int`, `DATETIME` → `DateTimeImmutable`)
+- **Défauts calqués sur la migration** : `NULL` → `= null`, `NOT NULL` sans `DEFAULT` → pas de défaut (non initialisée = obligatoire, `save()` lève une `LogicException`), `DEFAULT` → même défaut. Tout changement de schéma se répercute sur l'entité
+- `fillable()` = protection contre le mass-assignment uniquement ; `__get`/`__set` lèvent une `LogicException` sur une propriété inconnue (évite les propriétés dynamiques silencieuses en PHP < 8.2)
+- **Cache APCu** sur `find($id)` uniquement, désactivé en silence si APCu est absent
 
-Interface complète (`find`, `all`, `first`, `count`, `exists`, `save`, `delete`, `fill`, `toArray`, `paginate`, config par entité via `table()`/`primaryKey()`/`fillable()`) : voir `src/Core/Model.php`, implémenté.
+### Décisions de schéma (détail dans `database/migrations/`)
 
-Colonnes = propriétés publiques typées de l'entité (snake_case, même nom que la colonne), pas de tableau `$attributes` magique :
-- Le type déclaré sert de cast : `hydrate()`/`fill()` convertissent les valeurs brutes (`"42"` → `int`, `DATETIME` → `DateTimeImmutable`), `save()` fait l'inverse
-- Valeurs par défaut calquées sur la migration : colonne `NULL` → `= null`, colonne `NOT NULL` sans `DEFAULT` → pas de défaut PHP (propriété non initialisée = champ obligatoire, `save()` lève une `LogicException`), colonne avec `DEFAULT` → même défaut en PHP. Toute modification de schéma doit être répercutée sur l'entité
-- `fillable()` ne liste plus les colonnes : c'est uniquement la protection contre le mass-assignment
-- `__get`/`__set` lèvent une `LogicException` sur une propriété inconnue (sinon PHP < 8.2 crée une propriété dynamique en silence)
+- `User.role` : simple colonne (`owner`/`admin`/`user`), pas de tables de rôles pour la bêta
+- `Announcement.type` : VARCHAR libre (janaza/actualité/don…)
+- `Organization::forDomain($host)` : organisme du domaine, sinon le premier créé → mono comme multi-organisme sans logique en plus
+- **FK** : `organization_id` en `ON DELETE CASCADE`, `author_id` en `ON DELETE SET NULL` (d'où nullable), `ON UPDATE CASCADE` partout. Colonnes `*_id` en `BIGINT` pour matcher `'@id'` sur MySQL (sinon FK rejetée, invisible sous sqlite). sqlite : `PRAGMA foreign_keys = ON` au bootstrap, sinon FK ignorées sans erreur
 
-### Entités (`src/Entity/`)
+### À prévoir
 
-`Organization`, `User`, `Announcement`, `Media` — schéma exact dans `database/migrations/` et les classes elles-mêmes, pas dupliqué ici. Décisions notables non visibles dans le code :
-- `User.role` : simple colonne (`owner`/`admin`/`user`), pas de tables `roles`/`permissions` dédiées pour la bêta
-- `Announcement.type` : VARCHAR libre pour le regroupement (janaza/actualité/don...), pas de champs structurés par type
-- `Media` : indépendant des annonces, pas un attachement — confirmé par le cahier des charges ("Média" est un type de contenu à part, comme "Prières"). Volontairement générique (`media_path`, pas `audio_path`) : audio pour la bêta, mais réutilisable plus tard (galeries d'images…)
-- `Organization.domain` : `Organization::forDomain($host)` retourne l'organization dont le domaine correspond, sinon la première créée (fallback) — couvre nativement le cas mono-organisme actuel de la bêta tout en restant utilisable en multi-organisme (auto-hébergement) sans logique supplémentaire
-- Contraintes `FOREIGN KEY` en DB (via fragments SQL bruts dans `create()`, ex. `'FOREIGN KEY (x) REFERENCES y(id) ON DELETE ... ON UPDATE ...'`) : `organization_id` en `ON DELETE CASCADE` (supprimer une organization supprime son contenu), `announcements.author_id` et `media.author_id` en `ON DELETE SET NULL` (supprimer un `User` garde ses contenus, sans auteur — d'où `author_id` nullable), `ON UPDATE CASCADE` partout
-- Les colonnes `*_id` doivent être `BIGINT` (pas `INT`) pour matcher le type généré par `'@id'` sur MySQL (`BIGINT AUTO_INCREMENT`) — sinon la contrainte FK est rejetée (type incompatible), erreur qui n'apparaît que sur MySQL, pas sqlite (typage dynamique)
-- **sqlite n'applique pas les FK par défaut** : `PRAGMA foreign_keys = ON` exécuté sur la connexion sqlite au bootstrap, sinon les contraintes existent dans le schéma mais ne sont jamais vérifiées (silencieux, aucune erreur)
-
-### Cache objet (APCu, implémenté dans `find()`)
-
-Objectif : amortir la charge concurrente quand plusieurs utilisateurs demandent la même donnée en même temps (ex. `Organization`, une annonce populaire, pic de visiteurs sur la page newsroom publique). Le cache est APCu, partagé entre tous les process PHP.
-
-Portée limitée à `find($id)` : pas de cache sur `all()`/`paginate()`. Fallback silencieux si APCu est absent : cache désactivé, site fonctionnel sans le gain de perf.
-
-### À prévoir (hors socle initial, à activer si besoin)
-
-- Timestamps automatiques (`created_at` / `updated_at`) si activés sur l'entité
-- Exceptions dédiées (ex. `ModelNotFoundException`) plutôt que des retours `null` silencieux dans les cas critiques
-- Suppression d'une `Organization` : `ON DELETE CASCADE` supprime tout son contenu (`users`/`announcements`/`media`). À terme, proposer une option pour migrer les données vers une autre `Organization` avant suppression
+- Timestamps automatiques (`created_at`/`updated_at`), exceptions dédiées (`ModelNotFoundException`)
+- Suppression d'une `Organization` : proposer de migrer ses données vers une autre plutôt que tout supprimer en cascade
 
 ## Bootstrap applicatif (back-office)
 
@@ -72,28 +56,26 @@ Portée limitée à `find($id)` : pas de cache sur `all()`/`paginate()`. Fallbac
 - **`back/var/{APP_ENV}/`** : logs, cache de routes et fichier sqlite séparés par environnement — dossiers créés automatiquement au boot, jamais commités (seul `var/.gitkeep` est versionné)
 - **`DB_CONNECTION`** (`.env`) : `mysql` (défaut) ou `sqlite` — pour sqlite, `DB_DATABASE` ne contient que le nom du fichier (ex. `database.sqlite`), le chemin complet dans `var/{APP_ENV}/db/` est géré par le bootstrap ; sqlite reste réservé au dev/tests, non recommandé en prod (cf. stack technique)
 
-## Installation et mises à jour (mécanisme de versioning)
+## Installation et mises à jour
 
-Une installation fraîche est traitée comme une mise à jour depuis la version 0 — même mécanisme pour les deux cas.
+Une installation fraîche = une mise à jour depuis la version 0, même mécanisme (`Core/Migrator`).
 
-- **`APP_VERSION`** : chaîne `x.y.z` définie dans `public/index.php` avant de charger le bootstrap, ex. `define('APP_VERSION', '0.0.1');`. Règle d'incrémentation façon compteur : à chaque mise à jour on incrémente le dernier chiffre (patch) ; s'il atteint 9, on repasse à 0 et on incrémente le second chiffre (minor) ; si le minor atteint 9, on repasse à 0.0 et on incrémente le premier chiffre (major). Seul le major peut dépasser 9 (10, 11, ...), minor et patch restent des chiffres uniques (0-9)
-- **Numérotation** : tant que le projet est en bêta, on reste en `0.x` (première version réelle : `0.0.1`), `1.0.0` étant réservé à la première version stable
-- **Comparaison** : toujours `version_compare()`, jamais de comparaison de chaînes
-- **Table `version`** (append-only, créée par `Migrator::migrateTo()` à la première migration, pas à chaque requête) : une ligne par migration appliquée (`id` auto-increment, `version VARCHAR(20)`, `installed_at DATETIME`). La version actuelle de la DB = version de la dernière ligne insérée (triée par `id DESC`) ; `Migrator::NOT_INSTALLED` (`"0.0.0"`, valeur virtuelle sans ligne en base) si la table est absente ou vide → jamais installé
-- **Garde-fou de cohérence** : une table `version` absente ou vide ne veut dire "jamais installé" que si `organizations` et `users` ne contiennent aucune donnée. Sinon, `Migrator::currentVersion()` lève une exception au lieu de relancer l'installation sur un site qui a déjà des données. Une installation interrompue en pleine migration (tables créées, ligne `version` non écrite) reste rejouable, les migrations utilisant `IF NOT EXISTS`. `currentVersion()` lit directement la table `version` et n'analyse la base qu'en cas d'échec de la lecture
-- **Migrations** : fichiers PHP dans `back/database/migrations/`, nommés `AAAAMMJJ-x.y.z.php` (ex. `20260920-1.0.0.php`) — la date est une convention de lisibilité/traçabilité, seul le numéro de version après le tiret sert à l'ordonnancement (`uksort` + `version_compare`) et à la comparaison. Chaque fichier retourne une closure `function (Medoo $db): void` qui utilise l'API de Medoo (`create()`, la syntaxe `'@id'` pour les colonnes identité, etc.) plutôt que du SQL brut, pour rester portable entre mysql et sqlite (ex. gestion différente de l'auto-increment selon le moteur)
-- **À jour = aucune migration en attente** (pas `dbVersion === APP_VERSION`) : une release sans migration ne passe pas par `update_required` et n'ajoute aucune ligne. En `update_required`, le site public reste en ligne (routes de l'app chargées), seule l'administration affiche la mise à jour ; son lancement exigera d'être connecté (à brancher avec l'authentification, pas de route d'ici là)
-- **`Yawasla\Core\Migrator`** : lit la version courante, détermine les migrations en attente (`version_compare($version, $courante, '>') && version_compare($version, $cible, '<=')`), les exécute dans l'ordre croissant, insère une ligne `version` après chacune
-- **Aiguillage au boot, 5 états** (`Core/AppState`, une classe de routes par état dans `src/Routes/`) : `config_required` (pas de `.env` ou base inexistante, erreur 1049), `install_required` (étape déduite de la base, reprise possible après interruption), `update_required`, `ready`, `unavailable`. Actions de routes en méthodes (`[$this, 'action']`), jamais en closures : Slim lie les closures au conteneur. Toute autre erreur de connexion reste un **503** : ouvrir l'assistant lors d'une panne MySQL permettrait à n'importe qui de réécrire la config. Collation `utf8mb4_unicode_ci` (`0900_ai_ci` n'existe pas sous MariaDB)
-- **Cache de routes** : n'est activé que dans l'état "normal" (`dbVersion === APP_VERSION` et `!APP_ENV=dev`) — pendant install/update, l'ensemble de routes chargé change selon l'état de la DB, un cache figé sur le mauvais ensemble resterait servi indéfiniment après transition d'état
+- **`APP_VERSION`** (`public/index.php`) : compteur `x.y.z`, minor et patch de 0 à 9 (`0.0.9` → `0.1.0`, `0.9.9` → `1.0.0`). `0.x` pendant la bêta, `1.0.0` = première stable. Toujours `version_compare()`
+- **Migrations** : `back/database/migrations/AAAAMMJJ-x.y.z.php` (seule la version ordonne, la date est indicative), closure `function (Medoo $db): void` via l'API Medoo plutôt que du SQL brut (portabilité mysql/sqlite), `IF NOT EXISTS` pour rester rejouables
+- **Table `version`** (append-only) : une ligne par migration appliquée, la dernière = version de la base. Absente ou vide = jamais installé (`0.0.0`), sauf si `organizations`/`users` contiennent des données : exception plutôt que réinstaller par-dessus
+- **À jour = aucune migration en attente** : une release sans migration ne déclenche pas de mise à jour. En `update_required`, le site public reste en ligne, seule l'administration propose la mise à jour (lancement réservé aux connectés, à brancher avec l'authentification)
+- **5 états au boot** (`Core/AppState`, une classe de routes par état dans `src/Routes/`) : `config_required` (pas de `.env` ou base inexistante, erreur 1049), `install_required` (reprise possible après interruption), `update_required`, `ready`, `unavailable`. Toute autre erreur de connexion = **503** (ouvrir l'assistant pendant une panne MySQL laisserait réécrire la config)
+- **Cache de routes** : uniquement en `ready` hors dev, sinon un cache figé sur les routes d'install/update resterait servi
+- Actions de routes en méthodes (`[$this, 'action']`), jamais en closures (Slim les lie au conteneur). Collation `utf8mb4_unicode_ci` (`0900_ai_ci` absent de MariaDB)
 
-Séquence de boot (`src/bootstrap.php`) : env → `Config` → `Paths` → `Logger` → `AppState::resolve()` (connexion, version) → `Container` → App Slim → routes de l'état + `Http/ShellAction` → `run()`
+Boot (`src/bootstrap.php`) : env → `Config` → `Paths` → `Logger` → `AppState::resolve()` → `Container` → Slim → routes de l'état + `Http/ShellAction` → `run()`
 
 ## Distribution et passerelle PHP → React
 
 - **Point d'entrée unique** `public/index.php` : `/api/*` → Slim, tout le reste → `Http/ShellAction` + `AppShell` servent `resources/app.html` (index.html de Vite, distribution uniquement) en injectant à la place de `<!-- yawasla:boot -->` un `<base href>` et un JSON (`basePath`, `apiBase`, `status` de `GET /api/`). La sous-requête vers `/api/` doit être une requête neuve (sinon Slim réutilise le routage courant → boucle infinie)
 - **Front** : `src/app/boot.ts` lit ces données, toutes optionnelles (absentes en dev avec Vite). Build en `base: './'` → marche à la racine comme en sous-dossier
-- **Release** : `node scripts/release.mjs [--allow-dirty]` → `dist/yawasla-x.y.z.zip` + `.sha256`, version lue dans `APP_VERSION`, arbre git propre exigé. Assemblage isolé dans `build/` (supprimé si succès) : `npm ci` + build du front, `composer install --no-dev`, `php -l`, ZIP sans dépendance. Composer hors PATH : `COMPOSER_BIN`
+- **Release** : `node scripts/release.mjs` → `dist/yawasla-dev.zip` + `.sha256` (build de développeur : modifications non commitées ou absence de git tolérées, simple avertissement) ; `--release` → `dist/yawasla-x.y.z.zip`, version lue dans `APP_VERSION`, dépôt git et arbre propre exigés. Assemblage isolé dans `build/` (supprimé si succès) : `npm ci` + build du front, `composer install --no-dev`, `php -l`, ZIP sans dépendance. Composer hors PATH : `COMPOSER_BIN`
+- **Icône** : un seul fichier `front/public/icon.png` (PNG carré ≥ 512 px, pas de `.ico` ni de jeu de tailles) servant de favicon et d'`apple-touch-icon` — prévu pour être remplacé plus tard par l'icône de l'organisme envoyée depuis l'administration
 - **Sécurité** : racine du site sur `public/` ; `back/.htaccess` (`Require all denied`) protège le reste si tout est déposé à la racine, `public/.htaccess` réautorise
 
 ## Internationalisation (i18n)

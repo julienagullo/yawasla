@@ -1,5 +1,7 @@
 // Construit la distribution installable : dist/yawasla-x.y.z.zip (+ .sha256).
-// Usage (depuis la racine du projet) : node scripts/release.mjs [--allow-dirty]
+// Usage (depuis la racine du projet) : node scripts/release.mjs [--release]
+// Sans option : build de développeur (dist/yawasla-dev.zip). --release : version officielle nommée
+// d'après APP_VERSION, arbre git propre exigé.
 // Prérequis : Node 22+, npm, PHP et Composer dans le PATH. Aucune dépendance npm.
 // Composer : commande "composer", sinon un composer.phar du PATH (un alias du shell n'est pas visible
 // d'ici), sinon COMPOSER_BIN=/chemin/vers/composer.phar node scripts/release.mjs
@@ -29,6 +31,7 @@ const STAGING = join(STAGING_ROOT, 'yawasla')
 // Copie du front compilée à part : npm ci ne touche pas au node_modules de dev (serveur Vite en cours…)
 const FRONT_BUILD = join(STAGING_ROOT, 'front')
 const DIST = join(ROOT, 'dist')
+const RELEASE = process.argv.includes('--release')
 
 // Même marqueur que Yawasla\Core\AppShell::MARKER
 const SHELL_MARKER = '<!-- yawasla:boot -->'
@@ -125,18 +128,27 @@ function checkTools() {
   }
 }
 
+// Strict en --release (archive publiée = un commit), simple avertissement sinon (build de développeur)
 function checkGit() {
-  const status = output('git status --porcelain')
-
-  if (status !== '' && !process.argv.includes('--allow-dirty')) {
-    fail(
-      'Des modifications ne sont pas commitées : la distribution ne correspondrait à aucun commit.\n' +
-        '  Commitez-les, ou relancez avec --allow-dirty pour un build de test.',
-    )
+  let status = null
+  try {
+    status = output('git status --porcelain')
+  } catch {
+    // Pas de dépôt git (sources téléchargées en ZIP) ou git absent
   }
 
-  if (status !== '') {
-    console.log('  ⚠ modifications non commitées incluses (--allow-dirty)')
+  if (status === null) {
+    if (RELEASE) {
+      fail('--release exige un dépôt git : la distribution doit correspondre à un commit.')
+    }
+    console.log('  ⚠ pas de dépôt git')
+  } else if (status !== '') {
+    if (RELEASE) {
+      fail('Des modifications ne sont pas commitées : la distribution ne correspondrait à aucun commit.')
+    }
+    console.log('  ⚠ modifications non commitées incluses')
+  } else {
+    console.log('  arbre propre')
   }
 }
 
@@ -286,7 +298,7 @@ function packageRelease(version) {
 
   const files = listFiles(STAGING).sort()
   const zip = createZip(files, STAGING, 'yawasla')
-  const zipName = `yawasla-${version}.zip`
+  const zipName = RELEASE ? `yawasla-${version}.zip` : 'yawasla-dev.zip'
   const hash = createHash('sha256').update(zip).digest('hex')
 
   writeFileSync(join(DIST, zipName), zip)
@@ -298,7 +310,7 @@ function packageRelease(version) {
 }
 
 const version = readVersion()
-console.log(`Yawasla ${version}`)
+console.log(`Yawasla ${version}${RELEASE ? '' : ' (build de développeur)'}`)
 
 step('Outils')
 checkTools()
