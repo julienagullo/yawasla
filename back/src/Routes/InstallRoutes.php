@@ -133,6 +133,9 @@ final class InstallRoutes implements RouteProvider
             throw new ApiException('install.user_failed', 'Création du compte impossible.', [], 409);
         }
 
+        // Langue de l'interface au moment de la création ; repli fr si absente ou non gérée
+        $locale = in_array($data['locale'] ?? '', ['fr', 'en'], true) ? (string) $data['locale'] : 'fr';
+
         $owner = (new User())->fill([
             'organization_id' => $organization->id,
             'first_name' => $this->text($data, 'first_name', 'Prénom', 100, true),
@@ -141,6 +144,7 @@ final class InstallRoutes implements RouteProvider
             'email' => $email,
             'password' => password_hash($password, PASSWORD_DEFAULT),
             'role' => User::ROLE_OWNER,
+            'locale' => $locale,
         ]);
 
         if (!$owner->save()) {

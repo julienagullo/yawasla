@@ -6,6 +6,8 @@ import AdminLayout from '../layouts/AdminLayout'
 import NewsroomPage from '../pages/public/NewsroomPage'
 import MediaListPage from '../pages/public/MediaListPage'
 import LoginPage from '../pages/admin/LoginPage'
+import ForgotPage from '../pages/admin/ForgotPage'
+import ResetPage from '../pages/admin/ResetPage'
 import DashboardPage from '../pages/admin/DashboardPage'
 import ErrorPage from '../pages/ErrorPage'
 
@@ -26,6 +28,8 @@ export const router = createBrowserRouter(
         },
         // Administration
         { path: 'admin/login', element: <LoginPage /> },
+        { path: 'admin/forgot', element: <ForgotPage /> },
+        { path: 'admin/reset', element: <ResetPage /> },
         {
           path: 'admin',
           element: <AdminLayout />,

@@ -16,6 +16,9 @@ export default defineConfig(({ command, mode }) => {
         '/api': {
           target: env.VITE_API_PROXY_TARGET || 'http://localhost:8000',
           changeOrigin: true,
+          // Back servi dans un sous-dossier (ex. /yawasla) : cookie de session posé sur ce chemin,
+          // jamais renvoyé par le navigateur sur /api du serveur Vite
+          cookiePathRewrite: { '*': '/' },
         },
       },
     },

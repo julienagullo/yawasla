@@ -299,14 +299,18 @@ function packageRelease(version) {
   const files = listFiles(STAGING).sort()
   const zip = createZip(files, STAGING, 'yawasla')
   const zipName = RELEASE ? `yawasla-${version}.zip` : 'yawasla-dev.zip'
-  const hash = createHash('sha256').update(zip).digest('hex')
 
   writeFileSync(join(DIST, zipName), zip)
-  writeFileSync(join(DIST, `${zipName}.sha256`), `${hash}  ${zipName}\n`)
 
   console.log(`  ${files.length} fichiers, ${(zip.length / 1024 / 1024).toFixed(2)} Mo`)
   console.log(`  dist/${zipName}`)
-  console.log(`  SHA-256 : ${hash}`)
+
+  // Empreinte d'intégrité seulement pour une release officielle (distribuée) : inutile pour le build dev
+  if (RELEASE) {
+    const hash = createHash('sha256').update(zip).digest('hex')
+    writeFileSync(join(DIST, `${zipName}.sha256`), `${hash}  ${zipName}\n`)
+    console.log(`  SHA-256 : ${hash}`)
+  }
 }
 
 const version = readVersion()

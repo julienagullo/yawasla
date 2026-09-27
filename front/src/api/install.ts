@@ -33,6 +33,7 @@ export interface UserPayload {
   display_name: string
   email: string
   password: string
+  locale: string
 }
 
 export const createUser = (payload: UserPayload) =>

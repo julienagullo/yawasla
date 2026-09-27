@@ -94,11 +94,18 @@ abstract class Model
         return $this->exists;
     }
 
+    /** false : jamais mis en cache APCu (données sensibles, cache potentiellement partagé en mutualisé). */
+    protected static function cacheable(): bool
+    {
+        return true;
+    }
+
     public static function find(int|string $id): ?static
     {
         $cacheKey = static::cacheKey($id);
+        $cacheable = static::cacheable() && function_exists('apcu_fetch');
 
-        if (function_exists('apcu_fetch')) {
+        if ($cacheable) {
             $found = false;
             $cached = apcu_fetch($cacheKey, $found);
 
@@ -115,7 +122,7 @@ abstract class Model
 
         $instance = static::hydrate($row);
 
-        if (function_exists('apcu_store')) {
+        if ($cacheable) {
             apcu_store($cacheKey, $instance);
         }
 

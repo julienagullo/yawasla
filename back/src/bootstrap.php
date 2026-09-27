@@ -40,6 +40,13 @@ Dotenv::createImmutable($root)->safeLoad();
 $config = new Config($_ENV);
 $paths = new Paths($root, $config->appEnv);
 
+// Nouvelle version : cache vidé (sinon un déploiement qui ajoute des routes garderait l'ancien cache de routes)
+$versionFile = $paths->cacheDir() . '/version';
+if (@file_get_contents($versionFile) !== APP_VERSION) {
+    array_map('unlink', glob($paths->cacheDir() . '/*') ?: []);
+    file_put_contents($versionFile, APP_VERSION, LOCK_EX);
+}
+
 $logger = new Logger('yawasla');
 $logger->pushHandler(new StreamHandler($paths->logsDir() . '/app.log', Logger::DEBUG));
 

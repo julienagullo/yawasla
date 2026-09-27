@@ -10,7 +10,8 @@
         "vlucas/phpdotenv": "^5.7",
         "catfan/medoo": "^2.6",
         "psr/container": "^2.0",
-        "psr/log": "^3.0"
+        "psr/log": "^3.0",
+        "phpmailer/phpmailer": "^7.1"
     },
     "license": "Apache-2.0",
     "autoload": {

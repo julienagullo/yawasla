@@ -29,6 +29,7 @@ return function (Medoo $db): void {
         'email' => ['VARCHAR(255)', 'NOT NULL'],
         'password' => ['VARCHAR(255)', 'NOT NULL'],
         'role' => ['VARCHAR(20)', 'NOT NULL'],
+        'locale' => ['VARCHAR(5)', 'NOT NULL', "DEFAULT 'fr'"],
         'UNIQUE (email)',
         'FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE ON UPDATE CASCADE',
     ], $options);

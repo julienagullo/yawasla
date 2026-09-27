@@ -59,7 +59,7 @@ From the project root, run:
 node scripts/release.mjs
 ```
 
-This produces `dist/yawasla-dev.zip` and its SHA-256 checksum `dist/yawasla-dev.zip.sha256` (`dist/` is not versioned), including any uncommitted changes. A git repository is not required.
+This produces `dist/yawasla-dev.zip` (`dist/` is not versioned), including any uncommitted changes. A git repository is not required. The SHA-256 checksum is only generated for official releases (see below), not for dev builds.
 
 #### Official release
 

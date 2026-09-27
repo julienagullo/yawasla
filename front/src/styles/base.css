@@ -181,3 +181,9 @@ fieldset:disabled {
   grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
   gap: 0 1rem;
 }
+
+/* Lien secondaire sous un formulaire (mot de passe oublié, retour à la connexion) */
+.form-link {
+  margin-top: 1rem;
+  text-align: center;
+}

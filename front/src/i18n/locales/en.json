@@ -39,6 +39,12 @@
       "organization_failed": "Unable to create the organization.",
       "user_failed": "Unable to create the account."
     },
+    "auth": {
+      "missing_credentials": "Email and password are required.",
+      "invalid_credentials": "Incorrect email or password.",
+      "forbidden": "This account does not have access to the administration area.",
+      "invalid_reset_token": "Invalid or expired reset link."
+    },
     "fields": {
       "name": "Organization name",
       "address": "Address",
@@ -82,6 +88,7 @@
       "dashboard": "Dashboard"
     },
     "viewSite": "View the site",
+    "logout": "Sign out",
     "update": {
       "title": "Update required",
       "text": "The database needs to be updated (v{current} → v{target}). The public site remains available in the meantime."
@@ -94,7 +101,30 @@
       "title": "Sign in",
       "email": "Email address",
       "password": "Password",
-      "submit": "Sign in"
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "forgot": "Forgot your password?"
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "intro": "Enter your email address: if an account exists, you will receive a link to choose a new password.",
+      "email": "Email address",
+      "submit": "Send the link",
+      "submitting": "Sending…",
+      "done": "If an account matches this address, an email will arrive shortly. Remember to check your spam folder. The link is valid for 15 minutes.",
+      "backToLogin": "Back to sign in"
+    },
+    "reset": {
+      "title": "New password",
+      "intro": "Choose a new password for your account.",
+      "password": "New password",
+      "confirmation": "Confirmation",
+      "submit": "Save",
+      "submitting": "Saving…",
+      "passwordTooShort": "The password must be at least {min} characters long.",
+      "passwordMismatch": "The passwords do not match.",
+      "done": "Your password has been changed. You can now sign in.",
+      "backToLogin": "Go to sign in"
     }
   },
   "install": {

@@ -48,6 +48,12 @@ export interface Messages {
       organization_failed: string
       user_failed: string
     }
+    auth: {
+      missing_credentials: string
+      invalid_credentials: string
+      forbidden: string
+      invalid_reset_token: string
+    }
     fields: {
       name: string
       address: string
@@ -91,6 +97,7 @@ export interface Messages {
       dashboard: string
     }
     viewSite: string
+    logout: string
     update: {
       title: string
       text: string
@@ -104,6 +111,29 @@ export interface Messages {
       email: string
       password: string
       submit: string
+      submitting: string
+      forgot: string
+    }
+    forgot: {
+      title: string
+      intro: string
+      email: string
+      submit: string
+      submitting: string
+      done: string
+      backToLogin: string
+    }
+    reset: {
+      title: string
+      intro: string
+      password: string
+      confirmation: string
+      submit: string
+      submitting: string
+      passwordTooShort: string
+      passwordMismatch: string
+      done: string
+      backToLogin: string
     }
   }
   install: {

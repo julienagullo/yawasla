@@ -39,6 +39,12 @@
       "organization_failed": "Création de l’organisme impossible.",
       "user_failed": "Création du compte impossible."
     },
+    "auth": {
+      "missing_credentials": "L’e-mail et le mot de passe sont obligatoires.",
+      "invalid_credentials": "E-mail ou mot de passe incorrect.",
+      "forbidden": "Ce compte n’a pas accès à l’administration.",
+      "invalid_reset_token": "Lien de réinitialisation invalide ou expiré."
+    },
     "fields": {
       "name": "Nom de l’organisme",
       "address": "Adresse",
@@ -82,6 +88,7 @@
       "dashboard": "Tableau de bord"
     },
     "viewSite": "Voir le site",
+    "logout": "Se déconnecter",
     "update": {
       "title": "Mise à jour requise",
       "text": "La base de données doit être mise à jour (v{current} → v{target}). Le site public reste accessible en attendant."
@@ -94,7 +101,30 @@
       "title": "Connexion",
       "email": "Adresse e-mail",
       "password": "Mot de passe",
-      "submit": "Se connecter"
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "forgot": "Mot de passe oublié ?"
+    },
+    "forgot": {
+      "title": "Mot de passe oublié",
+      "intro": "Saisissez votre adresse e-mail : si un compte existe, vous recevrez un lien pour choisir un nouveau mot de passe.",
+      "email": "Adresse e-mail",
+      "submit": "Envoyer le lien",
+      "submitting": "Envoi…",
+      "done": "Si un compte correspond à cette adresse, un e-mail sera réceptionné. Pensez à vérifier vos spams. Le lien est valable 15 minutes.",
+      "backToLogin": "Retour à la connexion"
+    },
+    "reset": {
+      "title": "Nouveau mot de passe",
+      "intro": "Choisissez un nouveau mot de passe pour votre compte.",
+      "password": "Nouveau mot de passe",
+      "confirmation": "Confirmation",
+      "submit": "Enregistrer",
+      "submitting": "Enregistrement…",
+      "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "done": "Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter.",
+      "backToLogin": "Aller à la connexion"
     }
   },
   "install": {

@@ -20,14 +20,21 @@ final class User extends Model
     public string $email;
     public string $password;
     public string $role;
+    public string $locale = 'fr';
 
     public static function table(): string
     {
         return 'users';
     }
 
+    /** Contient le hash du mot de passe : jamais en cache APCu. */
+    protected static function cacheable(): bool
+    {
+        return false;
+    }
+
     public static function fillable(): array
     {
-        return ['organization_id', 'first_name', 'last_name', 'display_name', 'email', 'password', 'role'];
+        return ['organization_id', 'first_name', 'last_name', 'display_name', 'email', 'password', 'role', 'locale'];
     }
 }

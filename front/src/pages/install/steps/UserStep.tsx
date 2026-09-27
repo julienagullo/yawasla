@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { createUser } from '../../../api/install'
 import { useAsyncAction } from '../../../hooks/useAsyncAction'
-import { t } from '../../../i18n/i18n'
+import { currentLocale, t } from '../../../i18n/i18n'
 
 const MIN_PASSWORD_LENGTH = 8
 
@@ -43,6 +43,7 @@ export default function UserStep({ onCreated }: { onCreated: () => void }) {
         display_name: displayName,
         email,
         password,
+        locale: currentLocale(),
       }),
     ).then((ok) => ok && onCreated())
   }

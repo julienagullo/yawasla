@@ -8,7 +8,7 @@ use RuntimeException;
 
 /**
  * Emplacements des fichiers de l'application. Les dossiers de var/{APP_ENV}/ (logs, cache de
- * routes, fichier sqlite) sont créés à la première demande, jamais commités.
+ * routes, sessions, fichier sqlite) sont créés à la première demande, jamais commités.
  */
 final class Paths
 {
@@ -47,9 +47,21 @@ final class Paths
         return $this->ensure($this->root . '/var/' . $this->appEnv . '/db');
     }
 
-    private function ensure(string $dir): string
+    /** Réservé au propriétaire : un fichier de session lisible = session volable. */
+    public function sessionsDir(): string
     {
-        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
+        return $this->ensure($this->root . '/var/' . $this->appEnv . '/sessions', 0700);
+    }
+
+    /** État transitoire de sécurité (jetons de reset, tentatives de connexion…), réservé au propriétaire. */
+    public function tempDir(): string
+    {
+        return $this->ensure($this->root . '/var/' . $this->appEnv . '/temp', 0700);
+    }
+
+    private function ensure(string $dir, int $mode = 0775): string
+    {
+        if (!is_dir($dir) && !mkdir($dir, $mode, true) && !is_dir($dir)) {
             throw new RuntimeException("Impossible de créer le dossier \"{$dir}\".");
         }
 
