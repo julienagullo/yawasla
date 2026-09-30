@@ -3,6 +3,7 @@ import { logout } from '../api/auth'
 import { useAppStatus } from '../app/appStatus'
 import LanguageSelect from '../components/LanguageSelect'
 import Logo from '../components/Logo'
+import UpdateBanner from '../components/UpdateBanner'
 import { useAsyncAction } from '../hooks/useAsyncAction'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { t } from '../i18n/i18n'
@@ -72,6 +73,7 @@ export default function AdminLayout() {
       </aside>
 
       <main className={styles.main}>
+        <UpdateBanner />
         <Outlet />
       </main>
     </div>

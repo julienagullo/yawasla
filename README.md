@@ -20,27 +20,35 @@ The project is built around a minimal, lightweight open-source core (Apache 2.0 
 
 ## Quick start
 
-⚠️ The project is still at an early beta stage — the steps below cover the current backend skeleton, the application itself is not runnable yet.
+⚠️ The project is still at an early beta stage — installation and authentication work, business features are in progress.
 
 #### Requirements
 
 - PHP 8.0+
 - Composer
 - MySQL 8.0+ / MariaDB 10.11+ (SQLite supported, not recommended in production)
+- Node 22+ and npm
 
 #### Backend setup
 
 ```
-cd backend
+cd back
 composer install
-cp .env.example .env
+php -S localhost:8000 -t public
 ```
 
-Then edit `.env` with your database credentials.
+The `.env` file is optional at this point: without it, the installation wizard asks for the database credentials and writes it. To set it up by hand instead, copy `.env.example` to `.env` and edit it.
 
-#### Frontend
+#### Frontend setup
 
-Not initialized yet — the frontend will be a React app compiled via npm.
+```
+cd front
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+In dev, `/api` calls are proxied to the PHP backend (`VITE_API_PROXY_TARGET`, `http://localhost:8000` by default). Open the Vite URL: the installation wizard takes over.
 
 ## Building a release
 
@@ -71,7 +79,9 @@ This produces `dist/yawasla-dev.zip` (`dist/` is not versioned), including any u
 node scripts/release.mjs --release
 ```
 
-This produces `dist/yawasla-x.y.z.zip` and `dist/yawasla-x.y.z.zip.sha256`. Optionally, tag the commit (`git tag vx.y.z`) and attach both files to a GitHub release.
+This produces `dist/yawasla-x.y.z.zip`, `dist/yawasla-x.y.z.zip.sha256` and `dist/version.json`.
+
+4. Upload the archive and `version.json` side by side to the distribution server (`https://dist.yawasla.org/`): installed sites detect the new version and update in one click from the administration. Optionally, tag the commit (`git tag vx.y.z`) and attach the archive and its checksum to a GitHub release.
 
 #### Deployment
 

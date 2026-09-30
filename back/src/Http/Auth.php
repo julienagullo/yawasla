@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yawasla\Http;
 
+use Yawasla\Core\ApiException;
 use Yawasla\Core\Config;
 use Yawasla\Core\Paths;
 use Yawasla\Entity\User;
@@ -49,6 +50,18 @@ final class Auth
             $this->logout();
 
             return null;
+        }
+
+        return $user;
+    }
+
+    /** Garde des routes de l'administration : 401 si personne n'est connecté. */
+    public function requireAdmin(): User
+    {
+        $user = $this->user();
+
+        if ($user === null) {
+            throw new ApiException('auth.unauthenticated', 'Connexion requise.', [], 401);
         }
 
         return $user;

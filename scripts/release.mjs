@@ -1,4 +1,4 @@
-// Construit la distribution installable : dist/yawasla-x.y.z.zip (+ .sha256).
+// Construit la distribution installable : dist/yawasla-x.y.z.zip (+ .sha256 et version.json).
 // Usage (depuis la racine du projet) : node scripts/release.mjs [--release]
 // Sans option : build de développeur (dist/yawasla-dev.zip). --release : version officielle nommée
 // d'après APP_VERSION, arbre git propre exigé.
@@ -99,6 +99,18 @@ function listFiles(dir) {
 
     return IGNORED_FILES.has(entry.name) ? [] : [path]
   })
+}
+
+// Version de PHP minimale, d'après composer.json ("^8.0" → "8.0") : publiée dans version.json
+function readPhpRequirement() {
+  const composer = JSON.parse(readFileSync(join(BACK, 'composer.json'), 'utf8'))
+  const match = String(composer.require?.php ?? '').match(/(\d+\.\d+(?:\.\d+)?)/)
+
+  if (!match) {
+    fail('Version de PHP requise introuvable dans back/composer.json.')
+  }
+
+  return match[1]
 }
 
 // Version : public/index.php reste la source unique (define('APP_VERSION', 'x.y.z'))
@@ -310,6 +322,18 @@ function packageRelease(version) {
     const hash = createHash('sha256').update(zip).digest('hex')
     writeFileSync(join(DIST, `${zipName}.sha256`), `${hash}  ${zipName}\n`)
     console.log(`  SHA-256 : ${hash}`)
+
+    // Lu par les installations pour se mettre à jour (Yawasla\Core\Updater) : à publier à côté de
+    // l'archive, sur le serveur de distribution. URL relative, résolue par rapport à version.json
+    const manifest = {
+      version,
+      date: new Date().toISOString().slice(0, 10),
+      php: readPhpRequirement(),
+      url: zipName,
+      sha256: hash,
+    }
+    writeFileSync(join(DIST, 'version.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+    console.log('  dist/version.json')
   }
 }
 

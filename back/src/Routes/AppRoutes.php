@@ -12,7 +12,7 @@ use Yawasla\Http\Json;
 /** Fonctionnement normal : application installée et à jour. */
 final class AppRoutes implements RouteProvider
 {
-    public function __construct(private AuthRoutes $auth)
+    public function __construct(private AuthRoutes $auth, private ReleaseRoutes $release)
     {
     }
 
@@ -29,6 +29,7 @@ final class AppRoutes implements RouteProvider
     public function registerContent(RouteCollectorProxyInterface $api): void
     {
         $this->auth->register($api);
+        $this->release->register($api);
     }
 
     public function status(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface

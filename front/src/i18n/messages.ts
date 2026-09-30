@@ -53,6 +53,12 @@ export interface Messages {
       invalid_credentials: string
       forbidden: string
       invalid_reset_token: string
+      unauthenticated: string
+    }
+    update: {
+      failed: string
+      requirements: string
+      not_writable: string
     }
     fields: {
       name: string
@@ -101,6 +107,14 @@ export interface Messages {
     update: {
       title: string
       text: string
+      submit: string
+      submitting: string
+    }
+    release: {
+      available: string
+      install: string
+      installing: string
+      incompatible: string
     }
     dashboard: {
       title: string

@@ -43,7 +43,13 @@
       "missing_credentials": "L’e-mail et le mot de passe sont obligatoires.",
       "invalid_credentials": "E-mail ou mot de passe incorrect.",
       "forbidden": "Ce compte n’a pas accès à l’administration.",
-      "invalid_reset_token": "Lien de réinitialisation invalide ou expiré."
+      "invalid_reset_token": "Lien de réinitialisation invalide ou expiré.",
+      "unauthenticated": "Votre session a expiré : reconnectez-vous."
+    },
+    "update": {
+      "failed": "La mise à jour a échoué, réessayez plus tard.",
+      "requirements": "Votre hébergement ne permet pas cette mise à jour.",
+      "not_writable": "Fichiers du site non modifiables, vérifiez les droits d’écriture."
     },
     "fields": {
       "name": "Nom de l’organisme",
@@ -91,7 +97,15 @@
     "logout": "Se déconnecter",
     "update": {
       "title": "Mise à jour requise",
-      "text": "La base de données doit être mise à jour (v{current} → v{target}). Le site public reste accessible en attendant."
+      "text": "La base de données doit être mise à jour (v{current} → v{target}). Le site public reste accessible en attendant.",
+      "submit": "Mettre à jour la base",
+      "submitting": "Mise à jour en cours…"
+    },
+    "release": {
+      "available": "La version {version} de Yawasla est disponible.",
+      "install": "Mettre à jour",
+      "installing": "Mise à jour en cours…",
+      "incompatible": "Cette version n’est pas compatible avec votre hébergement."
     },
     "dashboard": {
       "title": "Tableau de bord",

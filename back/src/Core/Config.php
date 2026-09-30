@@ -20,6 +20,8 @@ final class Config
     public string $smtp;
     public string $mailFromAddress;
     public string $mailFromName;
+    /** version.json des releases (voir Updater), vide = vérification des mises à jour désactivée */
+    public string $updateUrl;
 
     public function __construct(array $env)
     {
@@ -35,6 +37,7 @@ final class Config
         $this->smtp = $env['MAIL_SMTP'] ?? '';
         $this->mailFromAddress = $env['MAIL_FROM_ADDRESS'] ?? 'noreply@yawasla.org';
         $this->mailFromName = $env['MAIL_FROM_NAME'] ?? 'Yawasla';
+        $this->updateUrl = $env['UPDATE_URL'] ?? 'https://dist.yawasla.org/version.json';
     }
 
     public function isDev(): bool

@@ -43,7 +43,13 @@
       "missing_credentials": "Email and password are required.",
       "invalid_credentials": "Incorrect email or password.",
       "forbidden": "This account does not have access to the administration area.",
-      "invalid_reset_token": "Invalid or expired reset link."
+      "invalid_reset_token": "Invalid or expired reset link.",
+      "unauthenticated": "Your session has expired: please sign in again."
+    },
+    "update": {
+      "failed": "The update failed, please try again later.",
+      "requirements": "Your hosting does not support this update.",
+      "not_writable": "Site files cannot be modified, check write permissions."
     },
     "fields": {
       "name": "Organization name",
@@ -91,7 +97,15 @@
     "logout": "Sign out",
     "update": {
       "title": "Update required",
-      "text": "The database needs to be updated (v{current} → v{target}). The public site remains available in the meantime."
+      "text": "The database needs to be updated (v{current} → v{target}). The public site remains available in the meantime.",
+      "submit": "Update the database",
+      "submitting": "Updating…"
+    },
+    "release": {
+      "available": "Yawasla version {version} is available.",
+      "install": "Update",
+      "installing": "Updating…",
+      "incompatible": "This version is not compatible with your hosting."
     },
     "dashboard": {
       "title": "Dashboard",
