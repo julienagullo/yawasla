@@ -14,7 +14,7 @@ use ZipArchive;
 
 /**
  * Mise à jour du code depuis le serveur de distribution (Config::$updateUrl). Le fichier version.json
- * (généré par scripts/release.mjs --release) décrit la dernière release :
+ * (généré par scripts/release.mjs, avec ou sans --release) décrit la dernière release :
  * { "version", "date", "php", "url", "sha256" }, "url" absolue ou relative à version.json.
  *
  * install() télécharge l'archive, vérifie son SHA-256 et écrase les fichiers de l'application (.env et
@@ -26,10 +26,8 @@ use ZipArchive;
  */
 final class Updater
 {
-    /** Vérification en ligne au plus une fois par jour, une heure après un échec (serveur injoignable…) */
-    private const CHECK_TTL = 86400;
-    private const FAILED_CHECK_TTL = 3600;
-    private const CHECK_TIMEOUT = 5;
+    /** Court : la vérification retarde la connexion */
+    private const CHECK_TIMEOUT = 3;
     private const DOWNLOAD_TIMEOUT = 300;
     /** Dossier racine des archives produites par release.mjs */
     private const ARCHIVE_PREFIX = 'yawasla/';
@@ -39,36 +37,36 @@ final class Updater
     }
 
     /**
-     * Release plus récente que la version installée, ou null (à jour, désactivé, serveur injoignable).
-     * Résultat en cache (vidé à chaque changement d'APP_VERSION, voir bootstrap).
+     * Interroge le serveur de distribution, à la connexion d'un administrateur (AuthRoutes::login).
+     * Échec silencieux : la connexion ne doit pas dépendre du serveur de distribution.
+     */
+    public function check(): void
+    {
+        if ($this->config->updateUrl === '') {
+            return;
+        }
+
+        try {
+            $release = $this->fetchRelease();
+        } catch (Throwable $exception) {
+            $this->logger->warning('Vérification des mises à jour impossible.', ['exception' => $exception]);
+            $release = null;
+        }
+
+        file_put_contents($this->cacheFile(), json_encode($release), LOCK_EX);
+    }
+
+    /**
+     * Release plus récente que la version installée, d'après la dernière vérification (check()), ou null.
+     * Le cache est vidé à chaque changement d'APP_VERSION (voir bootstrap).
      *
      * @return array{version: string, date: string, php: string, compatible: bool}|null
      */
     public function available(): ?array
     {
-        if ($this->config->updateUrl === '') {
-            return null;
-        }
+        $release = json_decode((string) @file_get_contents($this->cacheFile()), true);
 
-        $cacheFile = $this->paths->cacheDir() . '/release.json';
-        $cache = json_decode((string) @file_get_contents($cacheFile), true);
-        $ttl = ($cache['release'] ?? null) === null ? self::FAILED_CHECK_TTL : self::CHECK_TTL;
-
-        if (!is_array($cache) || time() - (int) ($cache['checked_at'] ?? 0) > $ttl) {
-            try {
-                $release = $this->fetchRelease();
-            } catch (Throwable $exception) {
-                // Silencieux pour l'utilisateur : l'administration ne doit pas dépendre du serveur de distribution
-                $this->logger->warning('Vérification des mises à jour impossible.', ['exception' => $exception]);
-                $release = null;
-            }
-
-            $cache = ['checked_at' => time(), 'release' => $release];
-            file_put_contents($cacheFile, json_encode($cache), LOCK_EX);
-        }
-
-        $release = $cache['release'];
-        if (!is_array($release) || !$this->isNewer($release)) {
+        if (!is_array($release) || !is_string($release['version'] ?? null) || !$this->isNewer($release)) {
             return null;
         }
 
@@ -145,7 +143,7 @@ final class Updater
     }
 
     /**
-     * version.json validé, lu directement sur le serveur (sans le cache de available()).
+     * version.json validé, lu sur le serveur de distribution.
      *
      * @return array{version: string, date: string, php: string, url: string, sha256: string}
      */
@@ -183,6 +181,11 @@ final class Updater
             'url' => $zipUrl,
             'sha256' => $data['sha256'],
         ];
+    }
+
+    private function cacheFile(): string
+    {
+        return $this->paths->cacheDir() . '/release.json';
     }
 
     /** @param array{version: string} $release */

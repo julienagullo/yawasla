@@ -93,7 +93,7 @@
     "nav": {
       "dashboard": "Dashboard"
     },
-    "viewSite": "View the site",
+    "version": "Version {version}",
     "logout": "Sign out",
     "update": {
       "title": "Update required",

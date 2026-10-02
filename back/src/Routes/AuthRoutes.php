@@ -11,6 +11,7 @@ use Slim\Interfaces\RouteCollectorProxyInterface;
 use Yawasla\Core\ApiException;
 use Yawasla\Core\Config;
 use Yawasla\Core\Paths;
+use Yawasla\Core\Updater;
 use Yawasla\Entity\User;
 use Yawasla\Http\Auth;
 use Yawasla\Http\Json;
@@ -32,6 +33,7 @@ final class AuthRoutes implements RouteProvider
         private MailTemplate $templates,
         private Urls $urls,
         private Config $config,
+        private Updater $updater,
     ) {
     }
 
@@ -99,6 +101,8 @@ final class AuthRoutes implements RouteProvider
 
         $this->throttle->clear($ip);
         $this->auth->login($user);
+        // Nouvelle version disponible : affichée ensuite dans l'administration (ReleaseRoutes)
+        $this->updater->check();
 
         return Json::respond($response, ['user' => $this->present($user)]);
     }

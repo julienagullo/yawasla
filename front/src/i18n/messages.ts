@@ -102,7 +102,7 @@ export interface Messages {
     nav: {
       dashboard: string
     }
-    viewSite: string
+    version: string
     logout: string
     update: {
       title: string

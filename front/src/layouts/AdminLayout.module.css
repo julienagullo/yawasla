@@ -86,7 +86,7 @@
   cursor: pointer;
 }
 
-.viewSite {
+.version {
   color: var(--ink-soft);
   font-size: 0.85rem;
 }

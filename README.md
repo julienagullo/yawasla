@@ -67,7 +67,7 @@ From the project root, run:
 node scripts/release.mjs
 ```
 
-This produces `dist/yawasla-dev.zip` (`dist/` is not versioned), including any uncommitted changes. A git repository is not required. The SHA-256 checksum is only generated for official releases (see below), not for dev builds.
+This produces `dist/yawasla-dev.zip` with its `.sha256` checksum and `version.json` (`dist/` is not versioned), including any uncommitted changes. A git repository is not required. Uploading the archive and `version.json` together to a test distribution server lets you try the automatic update without committing: never edit `version.json` by hand, or its checksum will no longer match the archive.
 
 #### Official release
 

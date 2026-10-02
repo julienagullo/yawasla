@@ -27,7 +27,7 @@ final class ReleaseRoutes implements RouteProvider
         $api->post('/admin/release/install', [$this, 'install']);
     }
 
-    /** `release` à null : à jour, vérification désactivée ou serveur injoignable. */
+    /** Résultat de la vérification faite à la connexion. `release` à null : à jour, désactivé ou injoignable. */
     public function check(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $this->auth->requireAdmin();

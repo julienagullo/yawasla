@@ -9,7 +9,7 @@ export interface Release {
   compatible: boolean
 }
 
-interface ReleaseResponse {
+export interface ReleaseResponse {
   current_version: string
   // null : à jour, vérification désactivée ou serveur de distribution injoignable
   release: Release | null

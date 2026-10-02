@@ -93,7 +93,7 @@
     "nav": {
       "dashboard": "Tableau de bord"
     },
-    "viewSite": "Voir le site",
+    "version": "Version {version}",
     "logout": "Se déconnecter",
     "update": {
       "title": "Mise à jour requise",

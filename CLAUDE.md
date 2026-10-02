@@ -30,7 +30,7 @@ Périmètre volontairement restreint (voir plus bas). Ne rien développer hors p
 - Table `version` vide mais données présentes → exception, jamais de réinstallation par-dessus
 - Erreur de connexion autre que « base inexistante » → **503**, jamais l'assistant (sinon une panne MySQL permettrait de réécrire la config)
 - En `update_required`, le site public reste en ligne ; la migration est lancée par un admin connecté (`POST /admin/update/migrate`)
-- Mise à jour du code (`Core\Updater`) : `version.json` (généré par `release.mjs --release`) sur `dist.yawasla.org` (`UPDATE_URL`), vérifié au plus 1×/24 h (cache). En un clic : téléchargement HTTPS, SHA-256, écrasement des fichiers (`index.php` en dernier, dossier public réel même renommé), puis `update_required` s'il y a des migrations. Volontairement simple : ni signature, ni sauvegarde, ni suppression des fichiers retirés d'une version à l'autre. Refusée hors distribution (sans `resources/app.html`)
+- Mise à jour du code (`Core\Updater`) : `version.json` (généré par `release.mjs`, build dev compris, jamais édité à la main) sur `dist.yawasla.org` (`UPDATE_URL`), vérifié à chaque connexion d’un admin (résultat en cache). En un clic : téléchargement HTTPS, SHA-256, écrasement des fichiers (`index.php` en dernier, dossier public réel même renommé), puis `update_required` s'il y a des migrations. Volontairement simple : ni signature, ni sauvegarde, ni suppression des fichiers retirés d'une version à l'autre. Refusée hors distribution (sans `resources/app.html`)
 - Cache de routes seulement en `ready` hors dev ; `var/{env}/cache/` vidé à chaque changement d'`APP_VERSION` (fichier `version`)
 - Actions Slim en méthodes, jamais en closures (Slim les lie au conteneur)
 

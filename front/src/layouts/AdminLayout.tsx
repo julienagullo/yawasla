@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Navigate, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { logout } from '../api/auth'
+import { fetchRelease, type ReleaseResponse } from '../api/update'
 import { useAppStatus } from '../app/appStatus'
 import LanguageSelect from '../components/LanguageSelect'
 import Logo from '../components/Logo'
@@ -21,6 +23,25 @@ export default function AdminLayout() {
   const user = useCurrentUser()
   const navigate = useNavigate()
   const { pending, run } = useAsyncAction()
+  const [release, setRelease] = useState<ReleaseResponse | null>(null)
+  const ready = Boolean(user) && status?.status !== 'update_required'
+
+  // Version installée et nouvelle version éventuelle, une fois l'admin connecté (route réservée aux admins).
+  // Échec silencieux : l'administration ne dépend pas du serveur de distribution
+  useEffect(() => {
+    if (!ready) {
+      return
+    }
+
+    let active = true
+    fetchRelease()
+      .then((r) => active && setRelease(r))
+      .catch(() => {})
+
+    return () => {
+      active = false
+    }
+  }, [ready])
 
   if (user === undefined) {
     return (
@@ -66,14 +87,14 @@ export default function AdminLayout() {
             </button>
           </div>
           <LanguageSelect />
-          <NavLink to="/" className={styles.viewSite}>
-            {t('admin.viewSite')}
-          </NavLink>
+          {release && (
+            <span className={styles.version}>{t('admin.version', { version: release.current_version })}</span>
+          )}
         </div>
       </aside>
 
       <main className={styles.main}>
-        <UpdateBanner />
+        <UpdateBanner release={release?.release ?? null} />
         <Outlet />
       </main>
     </div>

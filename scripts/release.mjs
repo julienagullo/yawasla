@@ -317,24 +317,23 @@ function packageRelease(version) {
   console.log(`  ${files.length} fichiers, ${(zip.length / 1024 / 1024).toFixed(2)} Mo`)
   console.log(`  dist/${zipName}`)
 
-  // Empreinte d'intégrité seulement pour une release officielle (distribuée) : inutile pour le build dev
-  if (RELEASE) {
-    const hash = createHash('sha256').update(zip).digest('hex')
-    writeFileSync(join(DIST, `${zipName}.sha256`), `${hash}  ${zipName}\n`)
-    console.log(`  SHA-256 : ${hash}`)
+  // Aussi pour le build dev : permet de tester la mise à jour automatique sans commiter. Archive et
+  // version.json toujours générés ensemble, sinon l'empreinte publiée ne correspond plus à l'archive
+  const hash = createHash('sha256').update(zip).digest('hex')
+  writeFileSync(join(DIST, `${zipName}.sha256`), `${hash}  ${zipName}\n`)
+  console.log(`  SHA-256 : ${hash}`)
 
-    // Lu par les installations pour se mettre à jour (Yawasla\Core\Updater) : à publier à côté de
-    // l'archive, sur le serveur de distribution. URL relative, résolue par rapport à version.json
-    const manifest = {
-      version,
-      date: new Date().toISOString().slice(0, 10),
-      php: readPhpRequirement(),
-      url: zipName,
-      sha256: hash,
-    }
-    writeFileSync(join(DIST, 'version.json'), `${JSON.stringify(manifest, null, 2)}\n`)
-    console.log('  dist/version.json')
+  // Lu par les installations pour se mettre à jour (Yawasla\Core\Updater) : à publier à côté de
+  // l'archive, sur le serveur de distribution. URL relative, résolue par rapport à version.json
+  const manifest = {
+    version,
+    date: new Date().toISOString().slice(0, 10),
+    php: readPhpRequirement(),
+    url: zipName,
+    sha256: hash,
   }
+  writeFileSync(join(DIST, 'version.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+  console.log('  dist/version.json')
 }
 
 const version = readVersion()
